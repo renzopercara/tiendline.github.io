@@ -142,38 +142,4 @@
     });
   }
 
-  function loadTranslations() {
-    // Obtener el idioma preferido del navegador
-    const browserLanguage = navigator.language || navigator.userLanguage;
-    const language = browserLanguage.split("-")[0]; // Obtener solo el código del idioma (por ejemplo, "en" de "en-US")
-
-    const url = `assets/lang/${language}.json`
-
-    loadJSON(url, (translation) => {
-      const elementsToTranslate = document.querySelectorAll("[lang-trans]");
-      elementsToTranslate.forEach((element) => {
-        const key = element.getAttribute("lang-trans");
-        if (key.includes("-placeholder")) {
-          element.placeholder = translation[key];
-        } else if (key.includes("-button")) {
-          element.textContent = translation[key];
-        } else {
-          element.innerHTML = translation[key];
-        }
-      });
-    });
-  }
-
-  function loadJSON(url, callback) {
-    var xhr = new XMLHttpRequest();
-    xhr.overrideMimeType("application/json");
-    xhr.open("GET", url, true);
-    xhr.onreadystatechange = function () {
-      if (xhr.readyState === 4 && xhr.status === 200) {
-        callback(JSON.parse(xhr.responseText));
-      }
-    };
-    xhr.send(null);
-  }
-  window.onload = loadTranslations;
 })(window.jQuery);

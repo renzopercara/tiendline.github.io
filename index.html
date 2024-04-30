@@ -1,19 +1,19 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="es">
   <head>
     <meta charset="utf-8" />
     <meta
       name="viewport"
       content="width=device-width, initial-scale=1, shrink-to-fit=no"
     />
-    <meta name="description" content="" />
-    <meta name="author" content="" />
+    <meta name="description" content="Systems Development" />
+    <meta name="author" content="Tiendline" />
     <link
       href="https://fonts.googleapis.com/css?family=Raleway:100,300,400,500,700,900"
       rel="stylesheet"
     />
 
-    <title>
+    <title lang-trans="PrincipalTitle">
       Tiendline: Tailored Digital Solutions for Websites and Systems Development
     </title>
     <!--
@@ -31,23 +31,12 @@ https://templatemo.com/tm-535-softy-pinko
     <link rel="stylesheet" type="text/css" href="assets/css/font-awesome.css" />
 
     <link rel="stylesheet" href="assets/css/templatemo-softy-pinko.css" />
+
+    <link rel="stylesheet" href="assets/css/flags.css">
   </head>
 
   <body>
-    <!-- Archivo de traducción en inglés -->
-    <script
-      src="assets/lang/en.json"
-      id="en-translation-file"
-      type="application/json"
-    ></script>
-
-    <!-- Archivo de traducción en español -->
-    <script
-      src="assets/lang/es.json"
-      id="es-translation-file"
-      type="application/json"
-    ></script>
-
+  
     <!-- ***** Preloader Start ***** -->
     <div id="preloader">
       <div class="jumper">
@@ -78,10 +67,22 @@ https://templatemo.com/tm-535-softy-pinko
                 <li><a href="#pricing-plans" lang-trans="Pricing Tables">Pricing Tables</a></li>
                 <!-- <li><a href="#blog" lang-trans="Blog Entries">Blog Entries</a></li> -->
                 <li><a href="#contact-us" lang-trans="Contact Us">Contact Us</a></li>
+                <li class="language-selector">
+                  <div class="select-wrapper">
+                      <select id="language-select" class="form-select" aria-label="Select Language">
+                          <option value="en" data-image="assets/images/flags/usa.png">English</option>
+                          <option value="es" data-image="assets/images/flags/spain.png">Español</option>
+                      </select>
+                      <div class="custom-select">
+                          <img src="assets/images/flags/usa.png" alt="English Flag" class="flag">
+                      </div>
+                  </div>
+              </li>
               </ul>
               <a class="menu-trigger">
                 <span>Menu</span>
               </a>
+              
               <!-- ***** Menu End ***** -->
             </nav>
           </div>
@@ -800,6 +801,20 @@ https://templatemo.com/tm-535-softy-pinko
       </div>
     </footer>
 
+    <!-- Archivo de traducción en inglés -->
+    <script
+      src="assets/lang/en.json"
+      id="en-translation-file"
+      type="application/json"
+    ></script>
+
+    <!-- Archivo de traducción en español -->
+    <script
+      src="assets/lang/es.json"
+      id="es-translation-file"
+      type="application/json"
+    ></script>
+
     <!-- jQuery -->
     <script src="assets/js/jquery-2.1.0.min.js"></script>
 
@@ -815,5 +830,9 @@ https://templatemo.com/tm-535-softy-pinko
 
     <!-- Global Init -->
     <script src="assets/js/custom.js"></script>
+
+    <!-- js manejo de traducción -->
+    <script src="assets/js/translation.js"></script>
+        
   </body>
 </html>
