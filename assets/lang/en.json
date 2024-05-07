@@ -54,6 +54,23 @@
   "lang-option-english": "Enlgish",
   "lang-option-spanish": "Spanish",
   "Our projects": "Our projects",
-  "Visit the site": "Visit the site"
-
+  "Visit the site": "Visit the site",
+  "plan-basic-title": "Basic",
+  "plan-basic-from": "From",
+  "plan-basic-period": "monthly",
+  "plan-basic-skill-1": "Static",
+  "plan-basic-skill-2": "Customized",
+  "plan-basic-skill-3": "Social media integration",
+  "plan-standard-title": "Standard",
+  "plan-standard-from": "From",
+  "plan-standard-period": "monthly",
+  "plan-standard-skill-1": "Dynamic",
+  "plan-standard-skill-2": "Advanced integration",
+  "plan-standard-skill-3": "Blogs and posts",
+  "plan-premium-title": "Premium",
+  "plan-premium-from": "From",
+  "plan-premium-period": "monthly",
+  "plan-premium-skill-1": "Custom systems development",
+  "plan-premium-skill-2": "Complex integration, continuous support",
+  "plan-premium-skill-3": "Guaranteed security"
 }
