@@ -2,18 +2,22 @@
 // NOTE manejo de traduccion 
 // Agregado es, en
 
+// Obtener el idioma seleccionado previamente del almacenamiento local
+var selectedLanguage = localStorage.getItem("lang") || navigator?.language?.split("-")?.[0];
+
 function loadTranslations(language) {
     // Si no se proporciona un idioma, obtener el idioma preferido del navegador
     if (!language) {
         language = navigator.language || navigator.userLanguage;
         language = language.split("-")[0]; // Obtener solo el código del idioma (por ejemplo, "en" de "en-US")
     }
+        
+    // Para usar traducciones del server en local
+    // const url = `https://www.tiendline.com/assets/lang/${language}.json`; 
 
     const url = `assets/lang/${language}.json`;
 
     loadJSON(url, (translation) => {
-        console.log(url)
-        console.log(translation)
         const elementsToTranslate = document.querySelectorAll("[lang-trans]");
         elementsToTranslate.forEach((element) => {
             const key = element.getAttribute("lang-trans");
@@ -39,10 +43,6 @@ function loadJSON(url, callback) {
     };
     xhr.send(null);
 }
-
-
-// Obtener el idioma seleccionado previamente del almacenamiento local
-var selectedLanguage = localStorage.getItem("lang");
 
 // check si hay idioma previo seleccionado
 if (selectedLanguage) {

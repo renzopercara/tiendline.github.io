@@ -58,9 +58,9 @@
   "plan-basic-title": "Basic",
   "plan-basic-from": "Desde",
   "plan-basic-period": "mensual",
-  "plan-basic-skill-1": "Static",
+  "plan-basic-skill-1": "Estático",
   "plan-basic-skill-2": "Personalizado",
-  "plan-basic-skill-3": "Integración de Redes Sociales",
+  "plan-basic-skill-3": "Integración con Redes Sociales",
   "plan-standard-title": "Standard",
   "plan-standard-from": "Desde",
   "plan-standard-period": "mensual",
@@ -72,5 +72,6 @@
   "plan-premium-period": "mensual",
   "plan-premium-skill-1": "Desarrollo sistemas a medida",
   "plan-premium-skill-2": "Integración compleja, soporte continuo",
-  "plan-premium-skill-3": "Seguridad garantizada"
+  "plan-premium-skill-3": "Seguridad garantizada",
+  "Contact us on WhatsApp": "Envíanos un WhatsApp"
 }
