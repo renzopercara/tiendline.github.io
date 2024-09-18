@@ -1,0 +1,82 @@
+/* custom-styles.css */
+
+/* Estilo del contenedor del calendario */
+#dp {
+    width: 100%;
+    height: 600px;
+    background-color: #ffffff;
+    border-radius: 8px;
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+}
+
+/* Sobreescribir el estilo de los eventos en DayPilot */
+.daypilot-event-bar {
+    background-color: #6aa84f !important;
+    /* Cambia el color de fondo de los eventos */
+    border: none !important;
+    /* Elimina el borde */
+    font-size: 14px !important;
+    /* Tamaño de fuente */
+    color: #ffffff !important;
+    /* Color de texto */
+    border-radius: 8px !important;
+    /* Bordes redondeados */
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2) !important;
+    /* Sombra */
+}
+
+/* Estilo del encabezado del calendario */
+.daypilot-header {
+    background-color: #3c78d8 !important;
+    /* Color de fondo del encabezado */
+    color: #ffffff !important;
+    /* Color del texto */
+    font-weight: bold;
+    /* Fuente en negrita */
+    text-transform: capitalize !important;
+    /* Capitaliza la primera letra de cada palabra */
+    font-family: 'Roboto', sans-serif !important;
+    /* Fuente moderna similar a Material Design */
+}
+
+/* Estilo de la barra de tiempo */
+.daypilot-time-bar {
+    background-color: #f1f1f1 !important;
+    /* Color de fondo de la barra de tiempo */
+    border-bottom: 1px solid #ddd !important;
+    /* Borde inferior */
+}
+
+/* Transición suave para los eventos */
+.daypilot-event-bar {
+    transition: background-color 0.3s ease, box-shadow 0.3s ease;
+}
+
+/* Efecto hover para los eventos */
+.daypilot-event-bar:hover {
+    background-color: #5a9f4f;
+    /* Color de fondo cuando se pasa el ratón */
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+    /* Sombra cuando se pasa el ratón */
+}
+
+.calendar_default_colheader_inner {
+    text-transform: capitalize;
+    font-weight: bold;
+}
+
+/* Estilo responsive para dispositivos móviles */
+@media (max-width: 768px) {
+    #dp {
+        height: 500px;
+        /* Ajusta la altura para móviles */
+    }
+
+    .container {
+        padding: 10px;
+    }
+}
+
+.calendar_default_alldayevent_inner, .calendar_default_event_inner {
+    border: 1px solid rgb(255 255 255) !important;
+}

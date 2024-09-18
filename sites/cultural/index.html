@@ -1,0 +1,117 @@
+<!DOCTYPE html>
+<html lang="es">
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>ADYC - Turnos Padel</title>
+  <link href="css/thememodern.css" type="text/css" rel="stylesheet" />
+  <link href="https://cdn.jsdelivr.net/npm/@materializecss/materialize@1.0.0/dist/css/materialize.min.css"
+    rel="stylesheet">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
+  <link rel="icon" href="images/favicon.ico" type="image/x-icon">
+  <script src="js/daypilot-all.min.js?v=2024.3.543"></script>  
+</head>
+
+<body>
+  <nav>
+    <div class="nav-wrapper blue-grey darken-4">
+      <a href="#!" class="brand-logo center">
+        ADYC - Turnos Padel
+        <img src="images/logo.png" alt="Logo de la Asociación">
+      </a>
+    </div>
+  </nav>
+
+  <div id="calendar-container" class="hidden">
+    <div class="container">
+      <div class="row">
+        <div class="col s12">
+          <ul class="tabs blue-grey darken-1">
+            <li class="tab col s6"><a href="#cancha-1" style="font-weight: bold;" class="white-text">Cancha 1</a></li>
+            <li class="tab col s6"><a href="#cancha-2" style="font-weight: bold;" class="white-text">Cancha 2</a></li>
+          </ul>
+        </div>
+
+        <!-- Tab de Cancha 1 -->
+        <div id="cancha-1" class="col s12">
+          <h4 class="center-align">Cancha 1</h4>
+
+          <div id="loading" class="loading-container">
+            <div class="preloader-wrapper big active">
+              <div class="spinner-layer spinner-blue">
+                <div class="circle-clipper left">
+                  <div class="circle"></div>
+                </div>
+                <div class="gap-patch">
+                  <div class="circle"></div>
+                </div>
+                <div class="circle-clipper right">
+                  <div class="circle"></div>
+                </div>
+              </div>
+            </div>
+            <p class="loading-text">Cargando...</p>
+          </div>
+
+          <div id="dp" class="z-depth-2"></div>
+        </div>
+
+        <!-- Tab de Cancha 2 -->
+        <div id="cancha-2" class="col s12">
+          <h4 class="center-align">Cancha 2</h4>
+          <div id="dp2" class="z-depth-2"></div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Botón de WhatsApp -->
+  <div class="fixed-action-btn">
+    <a href="https://wa.me/5493434155628" target="_blank" class="btn-floating btn-large green darken-3 tooltipped"
+      data-position="top" data-tooltip="Reservar turno por WhatsApp">
+      <i class="fab fa-whatsapp"></i>
+    </a>
+  </div>
+
+  <!-- Modal para más información -->
+  <div id="modal-info" class="modal">
+    <div class="modal-content">
+      <h4>Información adicional</h4>
+      <p>Detalles de los turnos...</p>
+    </div>
+    <div class="modal-footer">
+      <a href="#!" class="modal-close waves-effect waves-green btn-flat">Cerrar</a>
+    </div>
+  </div>
+
+  <!-- Footer -->
+  <footer class="footer">
+    <p>Contáctanos a través de <a href="https://wa.me/5493434155628" target="_blank">WhatsApp</a> para solicitar tu
+      turno.</p>
+  </footer>
+
+  <!-- Script de Materialize y otros -->
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/materialize/1.0.0/js/materialize.min.js"></script>
+  <script src="helpers/v2/app.js?v=2024.3.543"></script>
+  <script src="script.js"></script>
+
+  <script>
+    document.addEventListener('DOMContentLoaded', function () {
+      // Inicializa los tabs
+      var elemsTabs = document.querySelectorAll('.tabs');
+      var instancesTabs = M.Tabs.init(elemsTabs);
+
+      // Inicializa los tooltips
+      var elemsTooltip = document.querySelectorAll('.tooltipped');
+      var instancesTooltip = M.Tooltip.init(elemsTooltip);
+
+      // Inicializa el modal
+      var elemsModal = document.querySelectorAll('.modal');
+      var instancesModal = M.Modal.init(elemsModal);
+    });
+  </script>
+
+</body>
+
+</html>
