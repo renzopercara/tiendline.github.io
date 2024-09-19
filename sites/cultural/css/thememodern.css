@@ -12,10 +12,13 @@ table {
 .calendar_modern_main {
     --color-header-background: #636363;
 
-    --color-event-background: #5A9BD5; /* Azul */
+    --color-event-background: #5A9BD5;
+    /* Azul */
     --color-event-bar-background: transparent;
-    --color-event-bar: #4189C7; /* Azul oscuro */
-    --color-event-border: #4189C7; /* Azul oscuro */
+    --color-event-bar: #4189C7;
+    /* Azul oscuro */
+    --color-event-border: #4189C7;
+    /* Azul oscuro */
 
     --color-cell-background-business: #ffffff;
     --color-cell-background-nonbusiness: #f9f9f9;
@@ -142,9 +145,11 @@ table {
     margin-right: 1px;
     font-size: 13px;
     color: #ffffff;
-    background-color: var(--color-event-background); /* Azul */
+    background-color: var(--color-event-background);
+    /* Azul */
     border-radius: 5px;
-    border: 1px solid var(--color-event-border); /* Azul oscuro */
+    border: 1px solid var(--color-event-border);
+    /* Azul oscuro */
     display: flex;
     align-items: center;
 }
@@ -164,19 +169,23 @@ table {
     font-size: 13px;
     padding: 2px 2px 2px 16px;
     color: #ffffff;
-    background-color: var(--color-event-background); /* Azul */
+    background-color: var(--color-event-background);
+    /* Azul */
     border-radius: 5px;
-    border: 1px solid var(--color-event-border); /* Azul oscuro */
+    border: 1px solid var(--color-event-border);
+    /* Azul oscuro */
 }
 
 /* Colores alternos para los eventos */
 .calendar_modern_event_inner:nth-child(odd) {
-    background-color: #5A9BD5; /* Azul */
+    background-color: #5A9BD5;
+    /* Azul */
     border: 1px solid #4189C7;
 }
 
 .calendar_modern_event_inner:nth-child(even) {
-    background-color: #70AD47; /* Verde claro */
+    background-color: #70AD47;
+    /* Verde claro */
     border: 1px solid #5E8B41;
 }
 
@@ -192,7 +201,8 @@ table {
     position: absolute;
     width: 8px;
     border-radius: 8px;
-    background-color: var(--color-event-bar); /* Azul oscuro */
+    background-color: var(--color-event-bar);
+    /* Azul oscuro */
 }
 
 .calendar_modern_shadow_inner {
@@ -222,7 +232,7 @@ table {
 
 .calendar_modern_colheader {
     font-weight: bold;
-    text-transform: capitalize !important;    
+    text-transform: capitalize !important;
 }
 
 /* Botones estilo Material Design */
@@ -247,26 +257,32 @@ table {
 
 /* Botón OK - Material Design Primary Button */
 .modal_default_ok {
-    background-color: #1976D2; /* Azul primario */
+    background-color: #1976D2;
+    /* Azul primario */
     color: white;
 }
 
 .modal_default_ok:hover:not([disabled]) {
-    background-color: #1565C0; /* Azul más oscuro en hover */
-    box-shadow: 0px 4px 6px rgba(0, 0, 0, 0.3); /* Sombra en hover */
+    background-color: #1565C0;
+    /* Azul más oscuro en hover */
+    box-shadow: 0px 4px 6px rgba(0, 0, 0, 0.3);
+    /* Sombra en hover */
 }
 
 .modal_default_ok:active:not([disabled]) {
-    background-color: #0D47A1; /* Azul más oscuro en activo */
+    background-color: #0D47A1;
+    /* Azul más oscuro en activo */
 }
 
 .modal_default_ok:focus:not([disabled]) {
-    box-shadow: 0px 0px 0px 4px rgba(25, 118, 210, 0.3); /* Enfoque */
+    box-shadow: 0px 0px 0px 4px rgba(25, 118, 210, 0.3);
+    /* Enfoque */
 }
 
 /* Estado deshabilitado para botón OK */
 .modal_default_ok[disabled] {
-    background-color: #E0E0E0; /* Gris claro para deshabilitado */
+    background-color: #E0E0E0;
+    /* Gris claro para deshabilitado */
     color: #9E9E9E;
     cursor: not-allowed;
     box-shadow: none;
@@ -274,21 +290,25 @@ table {
 
 /* Botón Cancelar - Material Design Secondary Button */
 .modal_default_cancel {
-    background-color: #EEEEEE; /* Gris claro */
+    background-color: #EEEEEE;
+    /* Gris claro */
     color: #333;
 }
 
 .modal_default_cancel:hover {
     background-color: #E0E0E0;
-    box-shadow: 0px 4px 6px rgba(0, 0, 0, 0.2); /* Sombra en hover */
+    box-shadow: 0px 4px 6px rgba(0, 0, 0, 0.2);
+    /* Sombra en hover */
 }
 
 .modal_default_cancel:active {
-    background-color: #BDBDBD; /* Gris más oscuro en activo */
+    background-color: #BDBDBD;
+    /* Gris más oscuro en activo */
 }
 
 .modal_default_cancel:focus {
-    box-shadow: 0px 0px 0px 4px rgba(158, 158, 158, 0.3); /* Enfoque */
+    box-shadow: 0px 0px 0px 4px rgba(158, 158, 158, 0.3);
+    /* Enfoque */
 }
 
 
@@ -298,27 +318,28 @@ table {
     align-items: center;
     justify-content: center;
     height: 100vh;
-  }
-  
-  .skeleton {
+}
+
+.skeleton {
     background: #e0e0e0;
     border-radius: 4px;
     width: 100%;
     height: 200px;
     margin: 10px;
     animation: shimmer 1.5s infinite;
-  }
-  
-  @keyframes shimmer {
-    0% {
-      background-position: -1000px 0;
-    }
-    100% {
-      background-position: 1000px 0;
-    }
-  }  
+}
 
-  .loading-container {
+@keyframes shimmer {
+    0% {
+        background-position: -1000px 0;
+    }
+
+    100% {
+        background-position: 1000px 0;
+    }
+}
+
+.loading-container {
     position: fixed;
     top: 0;
     left: 0;
@@ -331,81 +352,179 @@ table {
     justify-content: center;
     z-index: 1000;
     transition: opacity 0.3s ease;
-  }
+}
 
-  .preloader-wrapper {
+.preloader-wrapper {
     margin-bottom: 10px;
-  }
+}
 
-  .spinner-layer {
+.spinner-layer {
     border-color: #3c78d8;
-  }
+}
 
-  .loading-text {
+.loading-text {
     font-size: 1.5rem;
     font-weight: 500;
     color: #3c78d8;
     text-align: center;
     margin: 0;
-  }
+}
 
-  .loading-container.hidden {
+.loading-container.hidden {
     opacity: 0;
     visibility: hidden;
-  }
+}
 
-  .loading-container.show {
+.loading-container.show {
     opacity: 1;
     visibility: visible;
-  }
+}
 
-  .nav-wrapper {
+.nav-wrapper {
     display: flex;
     align-items: center;
     justify-content: space-between;
     padding: 0 1rem;
-  }
+}
 
-  .nav-wrapper .brand-logo {
+.nav-wrapper .brand-logo {
     display: flex;
     align-items: center;
-  }
+}
 
-  .nav-wrapper .brand-logo img {
+.nav-wrapper .brand-logo img {
     height: 50px;
     margin-right: 10px;
-  }
+}
 
-  html, body {
+html,
+body {
     height: 100%;
     margin: 0;
     display: flex;
     flex-direction: column;
-  }
+}
 
-  body {
+body {
     display: flex;
     flex-direction: column;
     margin: 0;
-    height: 100vh; /* Full viewport height */
-  }
+    height: 100vh;
+    /* Full viewport height */
+}
 
-  #calendar-container {
-    flex: 1; /* Take up remaining space */
-    overflow: auto; /* Allow scrolling if content overflows */
-  }
+#calendar-container {
+    flex: 1;
+    /* Take up remaining space */
+    overflow: auto;
+    /* Allow scrolling if content overflows */
+}
 
-  .footer {
+.footer {
     background-color: #eeeeee;
     padding: 10px 20px;
     text-align: center;
     width: 100%;
-    position: fixed; /* Set the footer at the bottom */
-    bottom: 0; /* Align to bottom */
+    position: fixed;
+    /* Set the footer at the bottom */
+    bottom: 0;
+    /* Align to bottom */
     left: 0;
-  }
+}
 
-  .footer a {
+.footer a {
     color: #009688;
     text-decoration: none;
-  }
+}
+
+
+
+
+
+
+
+
+/* Estilos del contenedor de la tarjeta */
+.cancha-card {
+    margin: 30px 0;
+    /* Espacio entre tarjetas */
+    padding: 0;
+    background: linear-gradient(145deg, #636363, #818181);
+    /* Gradiente sutil en tonos grises */
+    border-radius: 15px;
+    /* Bordes más redondeados */
+    box-shadow: 0px 10px 15px rgba(0, 0, 0, 0.2);
+    /* Sombra moderna */
+    position: relative;
+    overflow: hidden;
+}
+
+/* Estilos del contenido de las tarjetas */
+.card-content {
+    padding: 50px 20px;
+    /* Más espacio interno para centrado visual */
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: linear-gradient(135deg, rgba(90, 155, 213, 0.9), rgba(90, 155, 213, 0.6));
+    /* Gradiente con transparencia */
+    border-radius: 15px;
+}
+
+/* Estilos del título */
+.title {
+    font-family: 'Roboto', sans-serif;
+    font-size: 2.5rem;
+    /* Título grande para que se destaque */
+    color: #ffffff;
+    /* Texto en blanco */
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 3px;
+    /* Espaciado entre letras para un estilo más moderno */
+    opacity: 0;
+    /* Para usar con animación */
+    animation: fadeIn 1.5s ease-in-out forwards;
+}
+
+/* Animación del título */
+@keyframes fadeIn {
+    0% {
+        opacity: 0;
+        transform: scale(0.8);
+    }
+
+    100% {
+        opacity: 1;
+        transform: scale(1);
+    }
+}
+
+
+
+/* Cambiar color del tab activo */
+.tabs .tab a.active {
+    background-color: #4189C7;
+    /* Color de fondo para el tab activo */
+    color: white !important;
+    /* Cambia el color del texto en el tab activo */
+}
+
+/* Cambiar color cuando se hace hover en los tabs */
+.tabs .tab a:hover {
+    background-color: rgba(65, 137, 199, 0.3);
+    /* Fondo más claro al hacer hover */
+    color: #ffffff;
+    /* Color del texto cuando está en hover */
+}
+
+/* Cambiar color del indicador del tab activo */
+.tabs .indicator {
+    background-color: #4189C7 !important;
+    /* Color del indicador (barra debajo del tab activo) */
+}
+
+
+.tabs .tab a:focus, .tabs .tab a:focus.active {
+    background-color: rgba(255, 255, 255, 0.2) !important
+}
