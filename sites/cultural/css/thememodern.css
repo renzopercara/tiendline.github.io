@@ -390,11 +390,29 @@ table {
 .nav-wrapper .brand-logo {
     display: flex;
     align-items: center;
+    justify-content: center;
+    text-align: center;
+    white-space: nowrap;
+    /* Evita que el texto se divida en varias líneas */
 }
 
 .nav-wrapper .brand-logo img {
-    height: 50px;
-    margin-right: 10px;
+    height: 40px;
+    margin-left: 10px;
+}
+
+@media screen and (max-width: 600px) {
+
+    /* Ajustar el tamaño del texto en pantallas pequeñas */
+    .nav-wrapper .brand-logo {
+        font-size: 16px;
+        /* Reduce el tamaño del texto */
+    }
+
+    .nav-wrapper .brand-logo img {
+        height: 30px;
+        /* Reduce el tamaño del logo en pantallas pequeñas */
+    }
 }
 
 html,
@@ -532,4 +550,8 @@ body {
 .tabs .tab a:focus,
 .tabs .tab a:focus.active {
     background-color: rgba(255, 255, 255, 0.2) !important
+}
+
+.card .card-content {
+    padding: 5px !important;
 }
