@@ -410,6 +410,10 @@ body {
     flex-direction: column;
     margin: 0;
     height: 100vh;
+    user-select: none;
+    -webkit-user-select: none;
+    -moz-user-select: none;
+    -ms-user-select: none;
     /* Full viewport height */
 }
 
@@ -525,6 +529,7 @@ body {
 }
 
 
-.tabs .tab a:focus, .tabs .tab a:focus.active {
+.tabs .tab a:focus,
+.tabs .tab a:focus.active {
     background-color: rgba(255, 255, 255, 0.2) !important
 }
