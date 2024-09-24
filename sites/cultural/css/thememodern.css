@@ -432,7 +432,8 @@ body {
     -webkit-user-select: none;
     -moz-user-select: none;
     -ms-user-select: none;
-    /* Full viewport height */
+    background: rgb(0,0,153);
+    background: linear-gradient(11deg, rgba(0,0,153,1) 0%, rgba(0,0,153,1) 20%, rgba(255,255,255,1) 41%, rgba(255,255,255,1) 51%, rgba(0,0,153,1) 75%, rgba(0,0,153,1) 100%);
 }
 
 #calendar-container {
