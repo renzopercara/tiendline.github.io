@@ -1,7 +1,10 @@
+const calendars = {};
+
+
 document.addEventListener('DOMContentLoaded', function () {
   var elems = document.querySelectorAll('.collapsible');
   M.Collapsible.init(elems, {
-    accordion: false  // Permite que más de un acordeón esté abierto a la vez
+    accordion: false 
   });
 });
 
@@ -15,36 +18,34 @@ document.addEventListener('DOMContentLoaded', () => {
   headerDateFormat = isSmallScreen ? "ddd" : "dddd";
 });
 
-// Función para manejar la carga de datos y actualizar la vista
 function handleDataLoad() {
   document.getElementById('loading').style.display = 'none';
 }
 
-fetch(jsonUrl1)
-  .then(response => response.json())
-  .then(data => {
-    const mergedData = mergeContinuousSlots(data);
-    setupCalendar(mergedData, "dp");
-  })
-  .catch(error => console.error('Error:', error))
-  .finally(() => {
-    if (document.getElementById('dp') && document.getElementById('dp2')) {
-      handleDataLoad(); // Solo muestra el contenido cuando ambos calendarios se han cargado
-    }
-  });
+Promise.all([
+  fetch(jsonUrl1)
+    .then(response => response.json())
+    .then(data => {
+      const mergedData = mergeContinuousSlots(data);
+      setupCalendar(mergedData, "dp");
+    }),
 
-fetch(jsonUrl2)
-  .then(response => response.json())
-  .then(data => {
-    const mergedData = mergeContinuousSlots(data);
-    setupCalendar(mergedData, "dp2");
-  })
-  .catch(error => console.error('Error:', error))
-  .finally(() => {
-    if (document.getElementById('dp') && document.getElementById('dp2')) {
-      handleDataLoad(); // Solo muestra el contenido cuando ambos calendarios se han cargado
-    }
-  });
+  fetch(jsonUrl2)
+    .then(response => response.json())
+    .then(data => {
+      const mergedData = mergeContinuousSlots(data);
+      setupCalendar(mergedData, "dp2");
+    })
+])
+.then(() => {
+  if (document.getElementById('dp') && document.getElementById('dp2')) {
+    handleDataLoad();
+  }
+  calendars.dp.init()
+})
+.catch(error => {
+  console.error('Error:', error);
+});
 
 function mergeContinuousSlots(data) {
   const mergedData = {};
@@ -78,14 +79,15 @@ function mergeContinuousSlots(data) {
   return mergedData;
 }
 
-function setupCalendar(data, divId) {
-  const dp = new DayPilot.Calendar(divId, {
+function setupCalendar(data, divId) {  
+  calendars[divId] = new DayPilot.Calendar(divId, {
     viewType: "Week",
     theme: "calendar_modern",
     startDate: DayPilot.Date.today().firstDayOfWeek(),
     headerDateFormat: headerDateFormat,
     showCurrentTime: true,
-    locale: "es-es",
+    locale: "es-es",    
+    initScrollPos: 840,
     onEventClick: async args => {
       const form = [
         { name: "Texto", id: "text", disabled: true }, 
@@ -99,7 +101,7 @@ function setupCalendar(data, divId) {
         return;
       }
 
-      dp.events.update(modal.result);
+      calendars[divId].events.update(modal.result);
     },
     onBeforeEventRender: args => {
       args.data.barBackColor = "transparent";
@@ -108,7 +110,7 @@ function setupCalendar(data, divId) {
       }
     },
   });
-  dp.init();
+  calendars[divId].init();
 
   const events = [];
 
@@ -133,7 +135,7 @@ function setupCalendar(data, divId) {
     });
   });
 
-  dp.update({ events });
+  calendars[divId].update({ events });
 }
 
 function createDayPilotDate(day, time) {
