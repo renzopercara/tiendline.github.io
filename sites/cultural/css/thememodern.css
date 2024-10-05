@@ -562,3 +562,10 @@ ul.tabs.blue-grey.darken-1 {
     border-bottom-left-radius: 2px !important;
     margin-top: .5rem;
 }
+
+
+@media (max-width: 768px) {
+    .container {
+        width: 100% !important;
+    }
+}
