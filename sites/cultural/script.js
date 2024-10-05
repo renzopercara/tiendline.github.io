@@ -80,6 +80,10 @@ function mergeContinuousSlots(data) {
 }
 
 function setupCalendar(data, divId) {  
+  const isMobile = window.matchMedia("(max-width: 768px)").matches;
+  const hourWidth = isMobile ? 30 : 60;
+  console.log('hourWidth: ', hourWidth);
+
   calendars[divId] = new DayPilot.Calendar(divId, {
     viewType: "Week",
     theme: "calendar_modern",
@@ -88,6 +92,7 @@ function setupCalendar(data, divId) {
     showCurrentTime: true,
     locale: "es-es",    
     initScrollPos: 840,
+    hourWidth,
     onEventClick: async args => {
       const form = [
         { name: "Texto", id: "text", disabled: true }, 

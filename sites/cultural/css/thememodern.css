@@ -563,9 +563,33 @@ ul.tabs.blue-grey.darken-1 {
     margin-top: .5rem;
 }
 
+.calendar_modern_rowheader_inner > div {
+    height: 100% !important;
+    display: flex !important;
+    justify-content: center !important;
+    align-items: center !important;
+    padding-left: 3px !important;
+}
 
 @media (max-width: 768px) {
     .container {
         width: 100% !important;
+    }
+
+    .calendar_modern_rowheader {
+        width: 40px;
+        height: 40px;
+    }
+
+    .calendar_modern_rowheader_minutes {
+        display: none;
+    }
+
+    .calendar_modern_main {
+        position: absolute !important; 
+        left: 0 !important;
+        right: 0 !important;
+        width: 100vw !important; 
+        height: 100px !important; 
     }
 }
