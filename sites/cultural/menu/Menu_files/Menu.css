@@ -1633,9 +1633,14 @@
 .u-container-layout.u-similar-container.u-valign-top.u-container-layout-2,
 .u-expanded-width.u-image.u-image-default.u-image-2.animated.customAnimationIn {
     border-radius: 15px; /* Bordes redondeados */
+    border-width: 3px;
     box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1); /* Sombra sutil para un efecto de profundidad */
     overflow: hidden; /* Asegura que el contenido respete los bordes redondeados */
     transition: box-shadow 0.3s ease, transform 0.3s ease; /* Transición suave para efectos de hover */
+}
+
+.u-expanded-width.u-image.u-image-default.u-image-2.animated.customAnimationIn {
+    border: solid;
 }
 
 /* Efecto de hover para mayor interactividad */
