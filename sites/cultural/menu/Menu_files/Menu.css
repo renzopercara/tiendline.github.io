@@ -1615,6 +1615,7 @@
   box-shadow: 0px 4px 10px rgba(0, 0, 0, 0.1); /* Sombra para darle efecto de elevación */
   animation: customAnimationIn 1.5s ease forwards; /* Animación personalizada */
   will-change: transform, opacity;
+  margin-top: auto;
 }
 
 /* Animación personalizada (simulando la entrada de tu animación existente) */
@@ -1637,6 +1638,13 @@
     box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1); /* Sombra sutil para un efecto de profundidad */
     overflow: hidden; /* Asegura que el contenido respete los bordes redondeados */
     transition: box-shadow 0.3s ease, transform 0.3s ease; /* Transición suave para efectos de hover */
+}
+
+.u-container-layout.u-similar-container.u-valign-top.u-container-layout-2 {
+  display: flex; 
+  flex-direction: column; 
+  justify-content: space-between; 
+  height: 100%;
 }
 
 .u-expanded-width.u-image.u-image-default.u-image-2.animated.customAnimationIn {
