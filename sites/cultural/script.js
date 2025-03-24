@@ -9,7 +9,7 @@ document.addEventListener('DOMContentLoaded', function () {
 });
 
 const jsonUrl1 = 'https://script.google.com/macros/s/AKfycbySbHoxbrXXqBqtrpuZFx-H_aESUj6RpTP4g7i7COdrzabwia_u84rY4SRlDVq5Jl-6tA/exec';
-const jsonUrl2 = 'https://script.google.com/macros/s/AKfycbw7pHtJ2WY2MkXA6S0HPHJY1laNtH8Z_SOnoMvvKdj_SKmK2hY6YoLjivZNJKTKZRf8/exec';
+const jsonUrl2 = 'https://script.google.com/macros/s/AKfycbwag59aPqAA9prPSV0nSc5AeRnkHYDRLHFcc07Nr7l0lwuia2S2XAKRq6rh3YQvroJH/exec';
 
 var isSmallScreen = false;
 var headerDateFormat = 'dddd';
