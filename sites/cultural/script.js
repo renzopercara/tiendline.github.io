@@ -8,8 +8,8 @@ document.addEventListener('DOMContentLoaded', function () {
   });
 });
 
-const jsonUrl1 = 'https://script.google.com/macros/s/AKfycbyvEKPNaItiD3uuoeltUF-7NWc2K9Cf4B6D3SNwM5C8LNm0t3xURVcTx1Cmt9pcY6dXeg/exec';
-const jsonUrl2 = 'https://script.google.com/macros/s/AKfycbzKONyvT3ut-qfLlC-7m3pLaRuUpsU_fjS79cy1piewsnPs0PnPycPpYu3oG4NjZKAZ_A/exec';
+const jsonUrl1 = 'https://script.google.com/macros/s/AKfycbxu70Kb4RHkMejdQrjYq_M2KykrFhpLBq5avLo59FKy-5dBmJHmRI3yfKrXtAL09Ij2zA/exec';
+const jsonUrl2 = 'https://script.google.com/macros/s/AKfycbw4_pUtCYrMQOjtGZSf-fCmLyt_-tj-FKhRVbfzaDCgNkBlGhI1GQrSSnxH4Oeedqj0bA/exec';
 
 var isSmallScreen = false;
 var headerDateFormat = 'dddd';
