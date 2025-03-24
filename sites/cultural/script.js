@@ -8,7 +8,7 @@ document.addEventListener('DOMContentLoaded', function () {
   });
 });
 
-const jsonUrl1 = 'https://script.google.com/macros/s/AKfycbxu70Kb4RHkMejdQrjYq_M2KykrFhpLBq5avLo59FKy-5dBmJHmRI3yfKrXtAL09Ij2zA/exec';
+const jsonUrl1 = 'https://script.google.com/macros/s/AKfycbz5ou_awGp1A27Wl-8LuJrrVlZSZie4MJzrxfV8tuyAKcsNlaqEIt4iE5jH_h_zgo3HzQ/exec';
 const jsonUrl2 = 'https://script.google.com/macros/s/AKfycbw4_pUtCYrMQOjtGZSf-fCmLyt_-tj-FKhRVbfzaDCgNkBlGhI1GQrSSnxH4Oeedqj0bA/exec';
 
 var isSmallScreen = false;
