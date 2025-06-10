@@ -18,12 +18,14 @@ function App() {
         const blue = dolares.find(d => d.nombre === 'Blue');
         const oficial = dolares.find(d => d.nombre === 'Oficial');
 
+        const valorDolar = Math.max(blue.venta, oficial.venta);
+
         return fetch('https://dolarapi.com/v1/cotizaciones/eur')
           .then(response => response.json())
           .then(euro => ({
             euroVenta: Math.ceil((euro.venta / oficial.venta) * 100) / 100,
             usdVenta: 1,
-            usdBlueVenta: blue.venta
+            usdBlueVenta: valorDolar
           }));
       })
       .then(data => {
