@@ -113,7 +113,7 @@ function App() {
             h("strong", null, "USD Venta:"), ` ${cotizaciones.usdVenta} USD`
           ),
           h("div", { style: { flex: '1', minWidth: '150px' } },
-            h("strong", null, "USD Blue Venta:"), ` ${cotizaciones.usdBlueVenta} ARS`
+            h("strong", null, "Cotización USD:"), ` ${cotizaciones.usdBlueVenta} ARS`
           )
         ),
         h("div", { style: { marginBottom: '20px' } },
