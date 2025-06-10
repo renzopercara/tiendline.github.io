@@ -165,7 +165,7 @@ function App() {
             h("p", null, h("strong", null, "Impuesto aduana (50% excedente):"), ` ${result.impuestoAduana.toFixed(2)} USD`),
             h("hr", { style: { margin: '15px 0' } }),
             h("p", null, h("strong", null, "Total final en USD:"), ` ${result.totalFinalUsd.toFixed(2)} USD`),
-            h("p", null, h("strong", null, "Total final en ARS (blue):"), ` ${result.totalFinalArs.toFixed(2)} ARS`)
+            h("p", null, h("strong", null, "Total final en ARS:"), ` ${result.totalFinalArs.toFixed(2)} ARS`)
           )
         )
       )
