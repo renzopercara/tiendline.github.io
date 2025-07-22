@@ -122,7 +122,7 @@ function App() {
             type: "number",
             value: priceEuro,
             onInput: (e) => setPriceEuro(e.target.value),
-            style: { width: '100%', padding: '10px', marginTop: '5px', border: '1px solid #ccc', borderRadius: '6px' }
+            style: { width: '95%', padding: '10px', marginTop: '5px', border: '1px solid #ccc', borderRadius: '6px' }
           })
         ),
         h("div", { style: { marginBottom: '20px' } },
@@ -131,7 +131,7 @@ function App() {
             type: "number",
             value: buyers,
             onInput: (e) => setBuyers(e.target.value),
-            style: { width: '100%', padding: '10px', marginTop: '5px', border: '1px solid #ccc', borderRadius: '6px' }
+            style: { width: '95%', padding: '10px', marginTop: '5px', border: '1px solid #ccc', borderRadius: '6px' }
           })
         ),
         h("button", {
