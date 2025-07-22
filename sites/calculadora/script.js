@@ -7,33 +7,56 @@ function App() {
   const [result, setResult] = useState(null);
   const [cotizaciones, setCotizaciones] = useState(null);
   const [loading, setLoading] = useState(true);
+  const [error, setError] = useState(null);
 
   const envioEuro = 50;
   const bonificacionUsd = 50;
 
   useEffect(() => {
+    setError(null);
     fetch('https://dolarapi.com/v1/dolares')
-      .then(response => response.json())
+      .then(response => {
+        if (!response.ok) {
+          throw new Error(`HTTP error! status: ${response.status}`);
+        }
+        return response.json();
+      })
       .then(dolares => {
         const blue = dolares.find(d => d.nombre === 'Blue');
         const oficial = dolares.find(d => d.nombre === 'Oficial');
 
+        if (!blue || !oficial) {
+          throw new Error('No se encontraron cotizaciones para Dólar Blue o Oficial.');
+        }
+
         const valorDolar = Math.max(blue.venta, oficial.venta);
 
         return fetch('https://dolarapi.com/v1/cotizaciones/eur')
-          .then(response => response.json())
-          .then(euro => ({
-            euroVenta: Math.ceil((euro.venta / oficial.venta) * 100) / 100,
-            usdVenta: 1,
-            usdBlueVenta: valorDolar
-          }));
+          .then(response => {
+            if (!response.ok) {
+              throw new Error(`HTTP error! status: ${response.status}`);
+            }
+            return response.json();
+          })
+          .then(euro => {
+            if (!euro || typeof euro.venta === 'undefined') {
+              throw new Error('No se encontró cotización para el Euro.');
+            }
+            return {
+              euroVenta: Math.ceil((euro.venta / oficial.venta) * 100) / 100,
+              usdVenta: 1,
+              usdBlueVenta: valorDolar
+            };
+          });
       })
       .then(data => {
         setCotizaciones(data);
         setLoading(false);
+        setError(null);
       })
       .catch(error => {
         console.error('Error al obtener cotizaciones:', error);
+        setError('No se pudieron cargar las cotizaciones. Intenta de nuevo más tarde.');
         setCotizaciones({
           euroVenta: 0,
           usdVenta: 0,
@@ -44,16 +67,21 @@ function App() {
   }, []);
 
   const calcular = () => {
-    if (!cotizaciones) {
-      alert('Cotizaciones no cargadas aún.');
+    if (!cotizaciones || cotizaciones.euroVenta === 0 || cotizaciones.usdBlueVenta === 0) {
+      setError('Las cotizaciones no están cargadas o son inválidas. No se puede calcular.');
       return;
     }
+    setError(null);
 
     const price = parseFloat(priceEuro);
     const cantidadCompradores = parseInt(buyers);
 
-    if (isNaN(price) || isNaN(cantidadCompradores) || cantidadCompradores <= 0) {
-      alert('Por favor ingresa valores válidos.');
+    if (isNaN(price) || price <= 0) {
+      setError('Por favor, ingresa un precio de producto válido y mayor a cero.');
+      return;
+    }
+    if (isNaN(cantidadCompradores) || cantidadCompradores <= 0) {
+      setError('Por favor, ingresa una cantidad de compradores válida y mayor a cero.');
       return;
     }
 
@@ -87,64 +115,79 @@ function App() {
   };
 
   return h("div", { style: { padding: '20px', maxWidth: '800px', margin: '40px auto', fontFamily: "'Roboto', sans-serif" } },
-    h("h1", { style: { textAlign: 'center', marginBottom: '30px' } }, "Calculadora de Compras Internacionales"),
+    h("h1", { style: { textAlign: 'center', marginBottom: '30px', color: '#333' } }, "Calculadora de Compras Internacionales"),
 
     loading ? (
       h("div", { style: { display: 'flex', justifyContent: 'center', alignItems: 'center', height: '200px' } },
         h("div", {
-          style: { 
-            border: '6px solid #eee', 
-            borderTop: '6px solid #1976d2', 
-            borderRadius: '50%', 
-            width: '50px', 
-            height: '50px', 
-            animation: 'spin 1s linear infinite' 
+          className: 'spinner',
+          style: {
+            border: '6px solid #eee',
+            borderTop: '6px solid #1976d2',
+            borderRadius: '50%',
+            width: '50px',
+            height: '50px',
           }
         })
       )
     ) : (
-      h("div", { style: { background: '#fff', padding: '20px', borderRadius: '10px', boxShadow: '0 4px 12px rgba(0,0,0,0.1)' } },
-        h("h2", { style: { fontSize: '20px', marginBottom: '15px' } }, "Cotizaciones actuales"),
-        h("div", { style: { display: 'flex', flexWrap: 'wrap', gap: '20px', marginBottom: '30px' } },
-          h("div", { style: { flex: '1', minWidth: '150px' } },
-            h("strong", null, "Euro Venta:"), ` ${cotizaciones.euroVenta} EUR`
-          ),
-          h("div", { style: { flex: '1', minWidth: '150px' } },
-            h("strong", null, "USD Venta:"), ` ${cotizaciones.usdVenta} USD`
-          ),
-          h("div", { style: { flex: '1', minWidth: '150px' } },
-            h("strong", null, "Cotización USD:"), ` ${cotizaciones.usdBlueVenta} ARS`
-          )
+      h("div", { style: { background: '#fff', padding: '30px', borderRadius: '12px', boxShadow: '0 4px 12px rgba(0,0,0,0.1)' } },
+        error && h("div", {
+          style: {
+            backgroundColor: '#ffe0e0',
+            color: '#d32f2f',
+            padding: '15px',
+            borderRadius: '8px',
+            marginBottom: '20px',
+            border: '1px solid #d32f2f',
+            fontWeight: 'bold'
+          }
+        }, error),
+
+        h("h2", { style: { fontSize: '20px', marginBottom: '20px', color: '#555' } }, "Cotizaciones actuales"),
+        h("div", { style: { display: 'flex', flexWrap: 'wrap', gap: '15px', marginBottom: '30px', justifyContent: 'space-around' } },
+          h("div", { style: {
+            backgroundColor: '#e3f2fd', color: '#1976d2', padding: '8px 15px', borderRadius: '20px', fontSize: '0.95rem', fontWeight: 'bold', boxShadow: '0 2px 4px rgba(0,0,0,0.05)'
+          }}, `Euro Venta: ${cotizaciones.euroVenta.toFixed(2)} EUR/USD`),
+          h("div", { style: {
+            backgroundColor: '#e3f2fd', color: '#1976d2', padding: '8px 15px', borderRadius: '20px', fontSize: '0.95rem', fontWeight: 'bold', boxShadow: '0 2px 4px rgba(0,0,0,0.05)'
+          }}, `USD Venta: ${cotizaciones.usdVenta.toFixed(2)} USD`),
+          h("div", { style: {
+            backgroundColor: '#e3f2fd', color: '#1976d2', padding: '8px 15px', borderRadius: '20px', fontSize: '0.95rem', fontWeight: 'bold', boxShadow: '0 2px 4px rgba(0,0,0,0.05)'
+          }}, `Cotización USD/ARS: ${cotizaciones.usdBlueVenta.toFixed(2)} ARS`)
         ),
+
         h("div", { style: { marginBottom: '20px' } },
-          h("label", { style: { fontWeight: 'bold' } }, "Precio del producto (€):"),
+          h("label", { style: { fontWeight: 'bold', display: 'block', marginBottom: '8px', color: '#444' } }, "Precio del producto (€):"),
           h("input", {
             type: "number",
             value: priceEuro,
             onInput: (e) => setPriceEuro(e.target.value),
-            style: { width: '95%', padding: '10px', marginTop: '5px', border: '1px solid #ccc', borderRadius: '6px' }
+            style: { width: '100%', paddingLeft: '12px', paddingTop: '12px', paddingBottom: '12px', border: '1px solid #ccc', borderRadius: '8px', fontSize: '16px' }
           })
         ),
-        h("div", { style: { marginBottom: '20px' } },
-          h("label", { style: { fontWeight: 'bold' } }, "Cantidad de compradores:"),
+        h("div", { style: { marginBottom: '30px' } },
+          h("label", { style: { fontWeight: 'bold', display: 'block', marginBottom: '8px', color: '#444' } }, "Cantidad de compradores:"),
           h("input", {
             type: "number",
             value: buyers,
             onInput: (e) => setBuyers(e.target.value),
-            style: { width: '95%', padding: '10px', marginTop: '5px', border: '1px solid #ccc', borderRadius: '6px' }
+            style: { width: '100%', paddingLeft: '12px', paddingTop: '12px', paddingBottom: '12px', border: '1px solid #ccc', borderRadius: '8px', fontSize: '16px' }
           })
         ),
         h("button", {
-          style: { 
-            width: '100%', 
-            padding: '12px', 
-            backgroundColor: '#1976d2', 
-            color: 'white', 
-            fontSize: '16px', 
-            border: 'none', 
-            borderRadius: '6px', 
-            cursor: 'pointer', 
-            transition: 'background-color 0.3s' 
+          style: {
+            width: '100%',
+            padding: '14px',
+            backgroundColor: '#1976d2',
+            color: 'white',
+            fontSize: '17px',
+            border: 'none',
+            borderRadius: '8px',
+            cursor: 'pointer',
+            transition: 'background-color 0.3s ease',
+            fontWeight: 'bold',
+            boxShadow: '0 4px 8px rgba(0,0,0,0.1)'
           },
           onClick: calcular,
           onMouseOver: (e) => e.target.style.backgroundColor = '#115293',
@@ -152,20 +195,28 @@ function App() {
         }, "Calcular"),
 
         result && h("div", {
-          style: { marginTop: '30px', background: '#f9f9f9', padding: '20px', borderRadius: '10px', border: '1px solid #ddd' }
+          style: { marginTop: '10px', padding: '25px', borderRadius: '10px', background: '#fefefe', boxShadow: '0 2px 8px rgba(0,0,0,0.05)' }
         },
-          h("h2", { style: { fontSize: '20px', marginBottom: '15px' } }, "Resultado"),
-          h("div", { style: { lineHeight: '1.8' } },
-            h("p", null, h("strong", null, "Precio en USD:"), ` ${result.priceUsd.toFixed(2)} USD`),
+          h("h2", { style: { fontSize: '22px', marginBottom: '20px', color: '#333' } }, "Resultado por persona"),
+          h("div", { style: { lineHeight: '2', '& p': { marginBottom: '8px' } } },
+            h("p", null, h("strong", null, "Precio del producto (USD):"), ` ${result.priceUsd.toFixed(2)} USD`),
             h("p", null, h("strong", null, "Envío total (USD):"), ` ${result.envioUsd.toFixed(2)} USD`),
-            h("p", null, h("strong", null, "Envío por persona:"), ` ${result.envioPorPersona.toFixed(2)} USD`),
-            h("p", null, h("strong", null, "Bonificación por persona:"), ` ${result.bonificacionPorPersona.toFixed(2)} USD`),
-            h("p", null, h("strong", null, "Total antes de aduana:"), ` ${result.totalAntesAduana.toFixed(2)} USD`),
-            h("p", null, h("strong", null, "Excedente después de bonificación:"), ` ${result.excedenteBonificacion.toFixed(2)} USD`),
-            h("p", null, h("strong", null, "Impuesto aduana (50% excedente):"), ` ${result.impuestoAduana.toFixed(2)} USD`),
-            h("hr", { style: { margin: '15px 0' } }),
-            h("p", null, h("strong", null, "Total final en USD:"), ` ${result.totalFinalUsd.toFixed(2)} USD`),
-            h("p", null, h("strong", null, "Total final en ARS:"), ` ${result.totalFinalArs.toFixed(2)} ARS`)
+            h("p", null, h("strong", null, "Envío por persona (USD):"), h("span", { style: { color: '#D32F2F', fontWeight: 'bold' } }, ` ${result.envioPorPersona.toFixed(2)} USD`)),
+            h("p", null, h("strong", null, "Bonificación aduanera por persona (USD):"), h("span", { style: { color: '#388E3C', fontWeight: 'bold' } }, ` ${result.bonificacionPorPersona.toFixed(2)} USD`)),
+            h("p", { style: { fontSize: '1.05rem', fontWeight: 'bold', backgroundColor: '#fffbe5', padding: '8px 12px', borderRadius: '4px', borderLeft: '5px solid #ffc107', marginBottom: '10px' } },
+              h("strong", null, "Total antes de aduana (USD):"), ` ${result.totalAntesAduana.toFixed(2)} USD`
+            ),
+            h("p", null, h("strong", null, "Excedente después de bonificación (USD):"), h("span", { style: { color: '#D32F2F', fontWeight: 'bold' } }, ` ${result.excedenteBonificacion.toFixed(2)} USD`)),
+            h("p", { style: { fontSize: '1.05rem', fontWeight: 'bold', backgroundColor: '#ffe0e0', padding: '8px 12px', borderRadius: '4px', borderLeft: '5px solid #d32f2f', marginBottom: '10px' } },
+              h("strong", null, "Impuesto aduana (USD):"), h("span", { style: { color: '#D32F2F', fontWeight: 'bold' } }, ` ${result.impuestoAduana.toFixed(2)} USD`)
+            ),
+            h("hr", { style: { margin: '20px 0', borderColor: '#eee' } }),
+            h("p", { style: { fontWeight: 'bold', fontSize: '1.3rem', backgroundColor: '#e3f2fd', padding: '12px 18px', borderRadius: '8px', borderLeft: '8px solid #1976d2', marginBottom: '15px' } },
+              h("strong", null, "Total final por persona (USD):"), h("span", { style: { color: '#1976d2' } }, ` ${result.totalFinalUsd.toFixed(2)} USD`)
+            ),
+            h("p", { style: { fontWeight: 'bold', fontSize: '1.3rem', backgroundColor: '#e8f5e9', padding: '12px 18px', borderRadius: '8px', borderLeft: '8px solid #388E3C' } },
+              h("strong", null, "Total final por persona (ARS):"), h("span", { style: { color: '#388E3C' } }, ` ${result.totalFinalArs.toFixed(2)} ARS`)
+            )
           )
         )
       )
