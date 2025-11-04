@@ -245,7 +245,7 @@ export const MatchesView = ({ matches, standings, isNormalTournament = false }) 
             const firstPendingIndex = matches.findIndex(isPending);
 
             if (firstPendingIndex !== -1 && matchRefs.current[firstPendingIndex]) {
-                const scrollIndex = Math.max(0, firstPendingIndex - 1);
+                const scrollIndex = Math.max(0, firstPendingIndex - 3);
                 matchRefs.current[scrollIndex].scrollIntoView({ behavior: 'smooth', block: 'start' });
             } else if (matchRefs.current[0]) {
                 matchRefs.current[0].scrollIntoView({ behavior: 'smooth', block: 'start' });
