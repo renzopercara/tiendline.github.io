@@ -27,109 +27,109 @@ const JQueryBracketView = ({ initialData }) => {
             $(bracketRef.current).empty();
 
             // Uso Mínimo como en el ejemplo:
-            $(bracketRef.current).bracket({
-                init: initialData,
-                teamWidth: 200,
-                scoreWidth: 30,
-                matchMargin: 40,
-                roundMargin: 50,
-                decorator: {
-                    render: function (container, teamData, score, state) {
+                $(bracketRef.current).bracket({
+                    init: initialData,
+                    teamWidth: 200,
+                    scoreWidth: 30,
+                    matchMargin: 40,
+                    roundMargin: 50,
+                    decorator: {
+                        render: function (container, teamData, score, state) {
 
-                        container.empty();
+                            container.empty();
 
 
-                        let name = '';
-                        if (typeof teamData === 'object' && teamData !== null) {
-                            name = teamData.name || '';
-                        } else if (typeof teamData === 'string') {
-                            name = teamData || '';
+                            let name = '';
+                            if (typeof teamData === 'object' && teamData !== null) {
+                                name = teamData.name || '';
+                            } else if (typeof teamData === 'string') {
+                                name = teamData || '';
+                            }
+
+                            container.append(`<div class="team-name" style="max-width: 90%; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;">${name}</div>`);
+
+                            setTimeout(() => {
+                                const detailedMap = window.globalDetailedResultsMap || {};
+
+                                // 1. Encontrar el contenedor del equipo (.team) que tiene data-teamid y envuelve todo.
+                                // El 'container' es el div.label. Buscamos el ancestro más cercano que es .team.
+                                const teamElement = $(container).closest('.team');
+
+                                if (teamElement.length) {
+                                    // Obtener teamId (0 o 1) del elemento .team
+                                    const teamId = teamElement.data('teamid');
+
+                                    // Obtener scoreElement (que tiene resultId)
+                                    const scoreElement = teamElement.find('.score');
+
+                                    if (scoreElement.length) {
+                                        const resultId = scoreElement.data('resultid');
+                                        const scoreData = detailedMap[resultId];
+
+                                        if (scoreData) {
+                                            // 2. LÓGICA CRUCIAL para extraer SETS (basada en Paridad de resultId)
+                                            // resultId IMPAR (1, 3, 5...) = Slot A (usa claves set1A, set2A)
+                                            // resultId PAR (2, 4, 6...) = Slot B (usa claves set1B, set2B)
+                                            const idNumber = parseInt(resultId.split('-')[1]);
+                                            const isTeamASlot = idNumber % 2 !== 0; // True si es impar (Slot A)
+
+                                            let currentSet1, currentSet2, currentTie;
+
+                                            if (isTeamASlot) {
+                                                currentSet1 = scoreData.set1A;
+                                                currentSet2 = scoreData.set2A;
+                                                currentTie = scoreData.tieA;
+                                            } else {
+                                                currentSet1 = scoreData.set1B;
+                                                currentSet2 = scoreData.set2B;
+                                                currentTie = scoreData.tieB;
+                                            }
+
+                                            // A. Renderizar los sets
+                                            const $scoresContainer = $(container).find('.detailed-scores');
+
+                                            // Usamos el DOM ya creado en la fase de render inicial
+                                            $scoresContainer.find('.score-set1').text(currentSet1 || '');
+                                            $scoresContainer.find('.score-set2').text(currentSet2 || '');
+
+                                            // Lógica opcional para Tiebreak
+                                            // if (currentTie && currentTie !== 0) { ... }
+
+                                            // B. AGREGAR BADGE DE HORA
+                                            // Esto se ejecuta SÓLO si es el slot A (impar), garantizando que se dibuje solo una vez por partido
+                                            if (scoreData.time && isTeamASlot) { // ⬅️ Condición robusta final
+
+                                                const time = scoreData.time;
+
+                                                // Buscamos el contenedor del partido completo (.match)
+                                                // teamElement (el .team) está dentro de .teamContainer, que está dentro de .match
+                                                const matchContainer = teamElement.closest('.match');
+
+                                                // Verificamos que el badge no exista antes de agregarlo
+                                                if (matchContainer.length && !matchContainer.find('.team-time-badge').length) {
+                                                    matchContainer.append(`<div class="team-time-badge" style="position:absolute;top:48%;right:16%;transform:translate(0, -50%);background:#2563EB;color:white;padding:2px 6px;border-radius:8px;font-size:12px;z-index:1000;pointer-events:none;">${time}</div>`);
+                                                }
+                                            }
+                                        }
+                                    }
+                                }
+                            }, 0);
+                        },
+
+                        edit: function (container, teamData, doneCb) {
+                            let name = (typeof teamData === 'object' && teamData !== null) ? teamData.name || '' : teamData || '';
+
+                            const input = $('<input type="text">');
+                            input.val(name);
+                            container.empty().append(input);
+                            input.focus();
+
+                            input.blur(() => {
+                                doneCb(input.val());
+                            });
                         }
-
-                        container.append(`<div class="team-name" style="max-width: 90%; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;">${name}</div>`);
-
-                        setTimeout(() => {
-    const detailedMap = window.globalDetailedResultsMap || {};
-
-    // 1. Encontrar el contenedor del equipo (.team) que tiene data-teamid y envuelve todo.
-    // El 'container' es el div.label. Buscamos el ancestro más cercano que es .team.
-    const teamElement = $(container).closest('.team'); 
-
-    if (teamElement.length) {
-        // Obtener teamId (0 o 1) del elemento .team
-        const teamId = teamElement.data('teamid'); 
-        
-        // Obtener scoreElement (que tiene resultId)
-        const scoreElement = teamElement.find('.score');
-        
-        if (scoreElement.length) {
-            const resultId = scoreElement.data('resultid');
-            const scoreData = detailedMap[resultId];
-
-            if (scoreData) {
-                // 2. LÓGICA CRUCIAL para extraer SETS (basada en Paridad de resultId)
-                // resultId IMPAR (1, 3, 5...) = Slot A (usa claves set1A, set2A)
-                // resultId PAR (2, 4, 6...) = Slot B (usa claves set1B, set2B)
-                const idNumber = parseInt(resultId.split('-')[1]);
-                const isTeamASlot = idNumber % 2 !== 0; // True si es impar (Slot A)
-
-                let currentSet1, currentSet2, currentTie;
-
-                if (isTeamASlot) { 
-                    currentSet1 = scoreData.set1A;
-                    currentSet2 = scoreData.set2A;
-                    currentTie = scoreData.tieA;
-                } else { 
-                    currentSet1 = scoreData.set1B;
-                    currentSet2 = scoreData.set2B;
-                    currentTie = scoreData.tieB;
-                }
-
-                // A. Renderizar los sets
-                const $scoresContainer = $(container).find('.detailed-scores');
-                
-                // Usamos el DOM ya creado en la fase de render inicial
-                $scoresContainer.find('.score-set1').text(currentSet1 || '');
-                $scoresContainer.find('.score-set2').text(currentSet2 || '');
-
-                // Lógica opcional para Tiebreak
-                // if (currentTie && currentTie !== 0) { ... }
-                
-                // B. AGREGAR BADGE DE HORA
-                // Esto se ejecuta SÓLO si es el slot A (impar), garantizando que se dibuje solo una vez por partido
-                if (scoreData.time && isTeamASlot) { // ⬅️ Condición robusta final
-                    
-                    const time = scoreData.time;
-                    
-                    // Buscamos el contenedor del partido completo (.match)
-                    // teamElement (el .team) está dentro de .teamContainer, que está dentro de .match
-                    const matchContainer = teamElement.closest('.match'); 
-
-                    // Verificamos que el badge no exista antes de agregarlo
-                    if (matchContainer.length && !matchContainer.find('.team-time-badge').length) {
-                        matchContainer.append(`<div class="team-time-badge" style="position:absolute;top:48%;right:-8%;transform:translate(0, -50%);background:#2563EB;color:white;padding:2px 6px;border-radius:8px;font-size:12px;z-index:1000;pointer-events:none;">${time}</div>`);
                     }
-                }
-            }
-        }
-    }
-}, 0);
-                    },
-
-                    edit: function (container, teamData, doneCb) {
-                        let name = (typeof teamData === 'object' && teamData !== null) ? teamData.name || '' : teamData || '';
-
-                        const input = $('<input type="text">');
-                        input.val(name);
-                        container.empty().append(input);
-                        input.focus();
-
-                        input.blur(() => {
-                            doneCb(input.val());
-                        });
-                    }
-                }
-            });
+                });
 
 
             setIsBracketLoaded(true);

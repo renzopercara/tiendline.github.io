@@ -150,3 +150,21 @@ div.jQBracket .btm.bracket-match { border-bottom-width: 0; border-right-width: 0
 #app > div > main > div > div:nth-child(3) > div > div > div > div:nth-child(4) > div:nth-child(1) > div.team-time-badge {
     top: 100% !important;
 }
+
+.detailed-scores {
+    display: inline-flex; 
+    align-items: center;
+    margin-left: 5px; 
+}
+
+.detailed-scores span {
+    background-color: #f0f0f0; 
+    border: 1px solid #ccc;
+    padding: 1px 4px;
+    margin-left: 3px;
+    font-size: 10px; 
+    min-width: 15px;
+    text-align: center;
+    line-height: 1.2;
+    border-radius: 2px;
+}
