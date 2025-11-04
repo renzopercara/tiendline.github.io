@@ -1,0 +1,148 @@
+/* --- 1. Contenedor y Tipografía General --- */
+div.jQBracket {
+    font-family: ui-sans-serif, system-ui, sans-serif;
+    color: #374151;
+    background: #f9fafb;
+    border-radius: 10px;
+}
+
+/* --- 2. Partidos (Match) y Estructura (QUITAMOS BORDE AQUÍ) --- */
+div.jQBracket .match {
+    background: #ffffff;
+    border: none !important; /* ELIMINADO: Borde del match removido */
+    border-radius: 6px;
+    box-shadow: 0 2px 4px -1px rgba(0, 0, 0, 0.1), 0 1px 2px -1px rgba(0, 0, 0, 0.06); 
+    transition: box-shadow 0.2s ease;
+}
+
+div.jQBracket .match:hover {
+    box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -2px rgba(0, 0, 0, 0.1);
+}
+
+/* --- 3. Equipos y Scores (NUEVO: Borde Redondeado en Team) --- */
+
+div.jQBracket .team {
+    /* Mantenemos altura original, pero ajustamos el padding horizontal */
+    background-color: transparent !important;
+    font-weight: 500;
+    
+    /* BORDE SUAVE Y REDONDEADO EN TEAM */
+    border: 1px solid #d1d5db !important; /* Borde gris suave */
+    border-radius: 4px; 
+
+    /* AJUSTE CLAVE: Reducimos padding horizontal de 3px a 2px para compensar el borde de 1px */
+    padding: 3px 2px 3px 2px !important; 
+    
+    /* Aseguramos que el contenido del label y score use el padding horizontal compensado */
+    height: auto !important; 
+}
+
+div.jQBracket .team div.label {
+    padding: 3px 0 3px 3px !important; /* Mantenemos padding original del label */
+}
+
+div.jQBracket .team:first-child {
+    /* El borde inferior nativo debe desaparecer ya que el .team tiene un borde completo */
+    border-bottom: none !important; 
+}
+
+/* Puntuación (Score) */
+div.jQBracket .team div.score {
+    background-color: #e5e7eb !important;
+    color: #374151 !important;
+    font-weight: 700;
+    /* Eliminamos el border-left nativo para evitar doble línea */
+    border-left: none !important; 
+    border-radius: 0 4px 4px 0 !important;
+}
+
+/* --- 4. ESTADOS CLAVE: Ganador (Verde) y Perdedor (Rojo Suave) --- */
+
+/* ESTADO GANADOR (WIN) */
+div.jQBracket .team.win {
+    color: #059669 !important;
+    font-weight: 700;
+    border-color: #10b981 !important; /* Borde verde brillante */
+}
+div.jQBracket .team.win div.score {
+    background-color: #10b981 !important;
+    color: #ffffff !important;
+    /* Eliminamos el border-left nativo */
+    border-left: none !important;
+}
+
+/* ESTADO PERDEDOR (LOSE) */
+div.jQBracket .team.lose {
+    background-color: #fef2f2 !important;
+    color: #b91c1c !important;
+    font-weight: 500;
+    border-color: #fca5a5 !important; /* Borde rojo claro */
+}
+div.jQBracket .team.lose div.score {
+    background-color: #fee2e2 !important;
+    color: #b91c1c !important;
+    border-left: none !important;
+}
+
+/* ESTADO BYE/NP/NA */
+div.jQBracket .team.bye, div.jQBracket .team.np, div.jQBracket .team.na {
+    background-color: #f3f4f6 !important;
+    color: #9ca3af !important;
+    font-style: italic;
+    font-weight: 400;
+    border-color: #e5e7eb !important;
+}
+div.jQBracket .team.bye div.score, div.jQBracket .team.np div.score, div.jQBracket .team.na div.score {
+    background-color: #e5e7eb !important;
+    color: #9ca3af !important;
+}
+
+/* --- 5. Destacado (HIGHLIGHT y HOVER) --- */
+div.jQBracket .team.highlightWinner, div.jQBracket .team.highlight {
+    background-color: #fde68a !important;
+    color: #a16207 !important;
+    border-color: #f59e0b !important;
+}
+
+div.jQBracket .team.highlightLoser {
+    background-color: #fecaca !important;
+    color: #b91c1c !important;
+    border-color: #fca5a5 !important;
+}
+
+/* --- 6. Conectores (Líneas) --- */
+div.jQBracket .connector { border-color: #d1d5db !important; border-width: 2px; }
+div.jQBracket .connector div.connector { border-bottom-color: #d1d5db !important; border-width: 2px; }
+div.jQBracket .connector.highlightWinner, div.jQBracket .connector div.connector.highlightWinner { border-color: #059669 !important; }
+div.jQBracket .connector.highlightLoser, div.jQBracket .connector div.connector.highlightLoser { border-color: #fca5a5 !important; }
+div.jQBracket .connector.highlight, div.jQBracket .connector div.connector.highlight { border-color: #f59e0b !important; }
+
+/* Asegurar que se eliminen los bordes originales */
+div.jQBracket .top.bracket-match { border-top-width: 0; border-right-width: 0; }
+div.jQBracket .btm.bracket-match { border-bottom-width: 0; border-right-width: 0; }
+
+.label {
+  position: relative; /* para posicionar el badge internamente */
+  z-index: 1;
+}
+
+.match {
+  position: relative;
+  overflow: visible !important;
+}
+
+/* Badge de hora */
+.team-time {
+  position: absolute;
+  left: 50%;
+  top: -10px; /* sale por arriba del match */
+  transform: translateX(-50%);
+  background-color: #0288d1;
+  color: white;
+  font-size: 11px;
+  padding: 2px 8px;
+  border-radius: 12px;
+  font-weight: 500;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.25);
+  z-index: 5;
+}
