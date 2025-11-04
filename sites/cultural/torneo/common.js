@@ -334,20 +334,41 @@ export const convertToBracketFormat = (matchData) => {
 
     if (initialRound && initialRound.length > 0) {
         initialRound.forEach(match => {
-            // USANDO CADENAS O NULL
             let teamA = match.player1A ? match.player1A : null;
             let teamB = match.player1B ? match.player1B : null;
 
-            // --- INICIO: ADICIÓN DE HORA AL NOMBRE DEL JUGADOR A (SÓLO PARA LA PRIMERA RONDA) ---
-            if (teamA && teamB && match.time) {
-                // Se añade la hora entre corchetes al nombre del primer jugador para visibilidad en el bracket.
-                teamA = `${teamA} [${match.time}]`;
-            }
-            // --- FIN: ADICIÓN DE HORA ---
+            // --- INICIO: Creación de objetos de datos completos ---
+            const matchDetails = { // Datos que adjuntaremos a CADA EQUIPO del partido
+                time: match.time || null,
+                set1A: match.set1A || null,
+                set1B: match.set1B || null,
+                set2A: match.set2A || null,
+                set2B: match.set2B || null,
+                tieA: match.tiebreakA || null,
+                tieB: match.tiebreakB || null,
+            };
 
-            teams.push([teamA, teamB]);
+            let teamAData = teamA ? { name: teamA, ...matchDetails } : null;
+            let teamBData = teamB ? { name: teamB, time: null } : null; // El tiempo solo lo adjuntamos al primer equipo para evitar duplicados en el badge.
+
+            // Sobrescribimos teamAData y teamBData con los sets específicos
+            if (teamAData) {
+                teamAData.set1 = match.set1A;
+                teamAData.set2 = match.set2A;
+                teamAData.tie = match.tiebreakA;
+            }
+            if (teamBData) {
+                teamBData.set1 = match.set1B;
+                teamBData.set2 = match.set2B;
+                teamBData.tie = match.tiebreakB;
+            }
+            
+            teams.push([teamAData, teamBData]); // Ahora pasamos objetos
+            // --- FIN: Creación de objetos de datos completos ---
         });
     }
+
+    // ... (El cálculo de 'results' se mantiene igual, ya que solo necesita el conteo total de sets ganados)
 
     phases.forEach(phase => {
         const roundMatches = groupedMatches[phase];
@@ -355,16 +376,20 @@ export const convertToBracketFormat = (matchData) => {
             const roundResults = roundMatches.map(match => {
                 let setsA = 0;
                 let setsB = 0;
-                // Lógica de conteo de sets aquí...
+                // ... (Lógica de conteo de sets se mantiene igual)
                 if ((parseInt(match.set1A) || 0) > (parseInt(match.set1B) || 0)) setsA++;
                 if ((parseInt(match.set1B) || 0) > (parseInt(match.set1A) || 0)) setsB++;
                 if ((parseInt(match.set2A) || 0) > (parseInt(match.set2B) || 0)) setsA++;
                 if ((parseInt(match.set2B) || 0) > (parseInt(match.set2A) || 0)) setsB++;
-                if (parseInt(match.tiebreakA) === 1) setsA++;
-                if (parseInt(match.tiebreakB) === 1) setsB++;
+
+                if (match.tiebreakA > match.tiebreakB) {
+                    setsA++;
+                } else if (match.tiebreakB > match.tiebreakA) {
+                    setsB++;
+                }
 
                 if (!match.set1A && !match.set1B) {
-                    return [null, null]; // Resultados nulos para partidos no jugados
+                    return [null, null];
                 }
 
                 return [setsA, setsB];

@@ -146,3 +146,7 @@ div.jQBracket .btm.bracket-match { border-bottom-width: 0; border-right-width: 0
   box-shadow: 0 1px 3px rgba(0, 0, 0, 0.25);
   z-index: 5;
 }
+
+.score {
+    visibility: hidden !important; /* Capa extra de seguridad */
+}
