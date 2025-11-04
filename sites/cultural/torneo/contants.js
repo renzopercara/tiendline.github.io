@@ -1,6 +1,6 @@
-export const AMERICANO_MUJERES_URL = 'https://script.google.com/macros/s/AKfycbyrFnQIaJLxGPrJusq3qZIKyIuZH3gFaIOdGxUROuRBST28T-EVgmFvOz3O2xJYaBsA/exec?action=americano';
-export const SUMA_14_MUJERES_URL = 'https://script.google.com/macros/s/AKfycbyrFnQIaJLxGPrJusq3qZIKyIuZH3gFaIOdGxUROuRBST28T-EVgmFvOz3O2xJYaBsA/exec?action=torneo14';
-export const SUMA_13_HOMBRES_URL = 'https://script.google.com/macros/s/AKfycbyrFnQIaJLxGPrJusq3qZIKyIuZH3gFaIOdGxUROuRBST28T-EVgmFvOz3O2xJYaBsA/exec?action=torneo13';
+export const AMERICANO_MUJERES_URL = 'https://script.google.com/macros/s/AKfycbx9aup0mOPJWCZQoqAfQPxStWiiVkyE5Y3ql7sSZTx3bUsLbAaVylx8NdaMcihiVCN_/exec?action=americano';
+export const SUMA_14_MUJERES_URL = 'https://script.google.com/macros/s/AKfycbx9aup0mOPJWCZQoqAfQPxStWiiVkyE5Y3ql7sSZTx3bUsLbAaVylx8NdaMcihiVCN_/exec?action=torneo14';
+export const SUMA_13_HOMBRES_URL = 'https://script.google.com/macros/s/AKfycbx9aup0mOPJWCZQoqAfQPxStWiiVkyE5Y3ql7sSZTx3bUsLbAaVylx8NdaMcihiVCN_/exec?action=torneo13';
 
 export const tournamentData = [
     { 

@@ -7,9 +7,8 @@ import { AMERICANO_MUJERES_URL, SUMA_14_MUJERES_URL, tournamentData, SUMA_13_HOM
 import { calculateStandings } from "./americano.js";
 import { Sum14ClassificationView } from "./suma14.js";
 import { MatchesView, PlayerTable, LoadingSpinner, convertToBracketFormat } from "./common.js";
-
-
-
+import { SponsorsSlider } from "./SponsorSlider.js";
+import { Facebook, Instagram, Linkedin } from "lucide-preact";
 
 const JQueryBracketView = ({ initialData }) => {
     const bracketRef = useRef(null);
@@ -64,18 +63,18 @@ const JQueryBracketView = ({ initialData }) => {
                                     matchContainer.append(`
         <div class="team-time-badge"
              style="
-                position:absolute;
-                top:50%;
-                left:75%;
-                transform:translate(-50%, -50%);
-                background:#2563EB;
-                color:white;
-                padding:2px 6px;
-                border-radius:8px;
-                font-size:12px;
-                z-index:1000;
-                pointer-events:none;
-             ">
+                 position:absolute;
+                 top:50%;
+                 left:75%;
+                 transform:translate(-50%, -50%);
+                 background:#2563EB;
+                 color:white;
+                 padding:2px 6px;
+                 border-radius:8px;
+                 font-size:12px;
+                 z-index:1000;
+                 pointer-events:none;
+               ">
           ${time}
         </div>
       `);
@@ -129,7 +128,8 @@ const JQueryBracketView = ({ initialData }) => {
 };
 
 const TournamentDetails = ({ data, firebaseStandings }) => {
-    const isNormalTournament = data.id === 1;
+    // CAMBIO 1: isNormalTournament debe incluir el nuevo ID para SUMA 13 Hombres (asumido como 2)
+    const isNormalTournament = data.id === 1 || data.id === 2;
     const initialSubTab = isNormalTournament ? 0 : 0;
     const [subTab, setSubTab] = useState(initialSubTab);
     const [matchData, setMatchData] = useState([]);
@@ -179,8 +179,10 @@ const TournamentDetails = ({ data, firebaseStandings }) => {
         if (data.id === 0) {
             fetchMatches(AMERICANO_MUJERES_URL, 0);
         } else if (data.id === 1) {
+            // SUMA 14 Mujeres
             fetchMatches(SUMA_14_MUJERES_URL, 1);
-        } else if (data.id === 1) {
+        } else if (data.id === 2) {
+            // CAMBIO 2: NUEVA LÓGICA para SUMA 13 Hombres (ID 2)
             fetchMatches(SUMA_13_HOMBRES_URL, 2);
         } else {
             setMatchData([]);
@@ -217,7 +219,8 @@ const TournamentDetails = ({ data, firebaseStandings }) => {
             content = subTab === 0
                 ? h(MatchesView, { matches: matchData, standings: americanoStandingsData, isNormalTournament: false })
                 : h(PlayerTable, { standings: americanoStandingsData.standingsArray, showRank: true });
-        } else if (data.id === 1) {
+        } else if (data.id === 1 || data.id === 2) {
+            // CAMBIO 3: Incluir data.id === 2 para SUMA 13 Hombres, usando las mismas vistas que SUMA 14
             content = subTab === 0
                 ? h(Sum14ClassificationView, { matchData: matchData })
                 : h(JQueryBracketView, { initialData: convertToBracketFormat(matchData) });
@@ -245,7 +248,8 @@ const TournamentContent = ({ data, standings, db, userId }) => (
         ),
         h('p', { className: 'text-gray-600 mb-6 text-center border-b pb-4' }, data.description),
 
-        (data.id === 0 || data.id === 1)
+        // CAMBIO 4: Incluir data.id === 2 aquí también para que se renderice TournamentDetails
+        (data.id === 0 || data.id === 1 || data.id === 2)
             ? h(TournamentDetails, { data: data, firebaseStandings: standings })
             : h('div', { className: 'space-y-4' },
                 h(PlayerTable, { standings: standings, showRank: true }),
@@ -256,10 +260,30 @@ const TournamentContent = ({ data, standings, db, userId }) => (
 
 
 function App() {
-    const [activeTab, setActiveTab] = useState(0);
+    const params = new URLSearchParams(window.location.search);
+    const initialTab = parseInt(params.get("tab")) || 0;
+
+    const [activeTab, setActiveTab] = useState(initialTab);
     const [userId, setUserId] = useState(null);
     const [db, setDb] = useState(null);
     const [standings, setStandings] = useState([]);
+
+
+    useEffect(() => {
+        const params = new URLSearchParams(window.location.search);
+        const tabParam = parseInt(params.get("tab"));
+        if (!isNaN(tabParam) && tabParam >= 0 && tabParam < tournamentData.length) {
+            setActiveTab(tabParam);
+        }
+    }, []);
+
+    useEffect(() => {
+        const params = new URLSearchParams(window.location.search);
+        params.set("tab", activeTab);
+        const newUrl = `${window.location.pathname}?${params.toString()}`;
+        window.history.replaceState(null, "", newUrl);
+    }, [activeTab]);
+
     const activeTournament = tournamentData[activeTab];
 
     useEffect(() => {
@@ -297,7 +321,8 @@ function App() {
     }, []);
 
     useEffect(() => {
-        if (!db || !userId || activeTournament.id === 0 || activeTournament.id === 1) {
+        // CAMBIO 5: Incluir data.id === 2 para evitar cargar standings de Firebase para SUMA 13
+        if (!db || !userId || activeTournament.id === 0 || activeTournament.id === 1 || activeTournament.id === 2) {
             setStandings([]);
             return;
         }
@@ -337,13 +362,58 @@ function App() {
         }, name);
     };
 
+    const socialLinks = [
+        {
+            href: "https://www.facebook.com/tiendline",
+            name: 'Facebook',
+            icon: h(Facebook, {
+                className: "w-6 h-6",
+                "aria-hidden": "true"
+            })
+        },
+        {
+            href: "https://www.instagram.com/tiendline",
+            name: 'Instagram',
+            icon: h(Instagram, {
+                className: "w-6 h-6",
+                "aria-hidden": "true"
+            })
+        },
+        {
+            href: "https://www.linkedin.com/company/54169569",
+            name: 'LinkedIn',
+            icon: h(Linkedin, {
+                className: "w-6 h-6",
+                "aria-hidden": "true"
+            })
+        },
+    ];
+
     return h('div', { className: 'flex flex-col' },
-        h('header', { className: 'bg-indigo-700 text-white p-4 shadow-lg' },
-            h('div', { className: 'text-center' },
-                h('h1', { className: 'text-xl font-bold' }, 'Gestor de Torneos'),
-                h('p', { className: 'text-sm text-indigo-200' }, 'Actualizaciones en tiempo real')
+        h('header', {
+            className: 'bg-indigo-800 text-white p-4 shadow-2xl sticky top-0 z-20'
+        },
+            h('div', {
+                className: 'flex items-center justify-center max-w-6xl mx-auto'
+            },
+                h('img', {
+                    src: 'images/logo-padel.png',
+                    alt: 'Logo ADYC',
+                    className: 'h-12 w-auto mr-4 object-contain rounded-lg bg-white p-1' // Clases para el logo
+                }),
+
+                h('div', { className: 'text-center' },
+                    h('h1', {
+                        className: 'text-3xl font-extrabold tracking-tight md:text-4xl'
+                    }, 'Torneo de Padel ADYC'),
+                    h('p', {
+                        className: 'text-sm text-indigo-300 mt-1'
+                    }, 'Actualizaciones y Resultados en Vivo')
+                )
             )
         ),
+
+        h(SponsorsSlider),
 
         h('nav', {
             className: 'flex justify-between bg-white border-b border-gray-200 shadow-md sticky top-0 z-10',
@@ -355,6 +425,39 @@ function App() {
         h('main', { className: 'p-2' },
             userId && h('div', { className: 'p-3 bg-gray-100 text-xs text-gray-600 break-words rounded-lg mb-4 text-center' }, `ID de Usuario: ${userId}`),
             h(TournamentContent, { data: activeTournament, standings: standings, db, userId })
+        ),
+
+
+
+
+        h('footer', { className: 'bg-gray-800 text-white mt-8 pt-6 pb-4 shadow-inner' },
+            h('div', { className: 'max-w-6xl mx-auto px-4' },
+
+                // Sección de Redes Sociales (Social Links)
+                h('div', { className: 'flex justify-center mb-4 border-b border-gray-700 pb-4' },
+                    h('ul', { className: 'flex space-x-6' },
+                        socialLinks.map(link =>
+                            h('li', { key: link.name },
+                                h('a', {
+                                    href: link.href,
+                                    target: '_blank',
+                                    rel: 'noopener noreferrer',
+                                    title: link.name,
+                                    className: 'text-gray-400 hover:text-indigo-400 transition-colors duration-200 text-2xl'
+                                }, link.icon) // Usando emoji como sustituto del icono
+                            )
+                        )
+                    )
+                ),
+
+                // Sección de Copyright
+                h('div', { className: 'text-center' },
+                    h('p', { className: 'text-sm text-gray-500' },
+                        'Copyright © 2020 Tiendline - Design: ',
+                        h('span', { className: 'font-semibold text-gray-400' }, 'Tiendline')
+                    )
+                )
+            )
         )
     );
 }
