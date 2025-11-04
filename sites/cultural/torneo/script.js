@@ -456,7 +456,7 @@ function App() {
                     className: 'flex items-center justify-center max-w-6xl mx-auto'
                 },
                     h('img', {
-                        src: 'images/logo-padel.png',
+                        src: 'images/logo.png',
                         alt: 'Logo ADYC',
                         className: 'h-12 w-auto mr-4 object-contain rounded-lg bg-white p-1'
                     }),
