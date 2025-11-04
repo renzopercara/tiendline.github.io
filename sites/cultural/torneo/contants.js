@@ -5,21 +5,21 @@ export const SUMA_13_HOMBRES_URL = 'https://script.google.com/macros/s/AKfycbx9a
 export const tournamentData = [
     { 
         id: 0, 
-        name: 'Americano Mujeres', 
+        name: 'Americano ♀️', 
         fullTitle: "Torneo Americano - Categoría Mujeres",
         icon: '🏆',
         description: "Partidos y Tabla de Posiciones actualizados en tiempo real.",
     },
     { 
         id: 1, 
-        name: 'Suma 14 Mujeres', 
+        name: 'Suma 14 ♀️', 
         fullTitle: "Torneo Suma 14 - Categoría Mujeres",
         icon: '♀️',
         description: "Aquí se mostrarán los datos detallados y las rondas del Torneo Suma 14 de Mujeres (Damas).",
     },
     { 
         id: 2, 
-        name: 'Suma 13 Hombres', 
+        name: 'Suma 13 ♂️', 
         fullTitle: "Torneo Suma 13 - Categoría Hombres",
         icon: '♂️',
         description: "Resultados actualizados del Torneo Suma 13 de Hombres (Caballeros).",

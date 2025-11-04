@@ -96,7 +96,7 @@ export const MatchCard = ({ match, standings, isNormalTournament = false }) => {
     // --- FIN LÓGICA DE SEPARACIÓN DE JUGADORES ---
 
     // --- LÓGICA DE STYLES Y GANADOR ---
-    let scoreClasses = 'text-2xl font-extrabold p-1 rounded-lg';
+    let scoreClasses = 'text-2 font-extrabold p-1 rounded-lg';
     let setsA = 0;
     let setsB = 0;
     let winner = null;
@@ -144,7 +144,7 @@ export const MatchCard = ({ match, standings, isNormalTournament = false }) => {
             else if ((parseInt(scoreB) || 0) > (parseInt(scoreA) || 0)) winner = 'B';
         }
     } else {
-        scoreClasses = 'text-2xl font-extrabold p-1 rounded-lg bg-gray-200 text-gray-500';
+        scoreClasses = 'text-2 font-extrabold p-1 rounded-lg bg-gray-200 text-gray-500';
         scoreContent = h('span', { className: scoreClasses }, 'vs');
     }
 

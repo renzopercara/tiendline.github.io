@@ -328,7 +328,7 @@ const MatchCard = ({ match, standings, isSuma14 = false }) => {
     const timeString = time; 
 
     // --- LÓGICA DE STYLES Y GANADOR ---
-    let scoreClasses = 'text-2xl font-extrabold p-1 rounded-lg';
+    let scoreClasses = 'text-2 font-extrabold p-1 rounded-lg';
     let setsA = 0;
     let setsB = 0;
     let winner = null;
@@ -369,7 +369,7 @@ const MatchCard = ({ match, standings, isSuma14 = false }) => {
             else if ((parseInt(scoreB) || 0) > (parseInt(scoreA) || 0)) winner = 'B';
         }
     } else {
-        scoreClasses = 'text-2xl font-extrabold p-1 rounded-lg bg-gray-200 text-gray-500';
+        scoreClasses = 'text-2 font-extrabold p-1 rounded-lg bg-gray-200 text-gray-500';
         scoreContent = h('span', { className: scoreClasses }, 'vs');
     }
     
@@ -614,7 +614,7 @@ const FinalPhaseView = ({ matchData }) => {
                 const gridClasses = roundName === 'FINAL' ? 'grid-cols-1' : 'grid-cols-1 sm:grid-cols-2 lg:grid-cols-3';
                 
                 return h('div', { key: roundName, className: 'mb-8' },
-                    h('h4', { className: 'text-2xl font-extrabold text-indigo-700 mb-4 border-b-2 border-indigo-200 pb-2 text-center' }, roundName),
+                    h('h4', { className: 'text-2 font-extrabold text-indigo-700 mb-4 border-b-2 border-indigo-200 pb-2 text-center' }, roundName),
                     h('div', { className: `grid ${gridClasses} gap-4 justify-center` },
                         games.map((game, index) => h(BracketGame, { key: index, game, roundName }))
                     )
@@ -741,7 +741,7 @@ const TournamentContent = ({ data, standings, db, userId }) => (
     h('div', { className: 'p-4 sm:p-6 bg-white rounded-lg shadow-inner' },
         h('div', { className: 'flex items-center justify-center mb-4' },
             h('div', { className: 'text-5xl mr-3' }, data.icon),
-            h('h3', { className: 'text-2xl font-extrabold text-gray-800' }, data.fullTitle)
+            h('h3', { className: 'text-2 font-extrabold text-gray-800' }, data.fullTitle)
         ),
         h('p', { className: 'text-gray-600 mb-6 text-center border-b pb-4' }, data.description),
         
