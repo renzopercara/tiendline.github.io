@@ -34,114 +34,104 @@ const JQueryBracketView = ({ initialData }) => {
                 matchMargin: 40,
                 roundMargin: 50,
                 decorator: {
-    render: function (container, teamData, score, state) {
-        
-        // 1. EXTRAER DATOS DETALLADOS
-        const name = teamData ? teamData.name : "";
-        const time = teamData ? teamData.time : ""; 
-        const set1 = teamData ? teamData.set1 : null;
-        const set2 = teamData ? teamData.set2 : null;
-        const tie = teamData ? teamData.tie : null;
-        
-        container.empty();
-        
-        // 2. CONTENEDOR FLEXIBLE PARA NOMBRE Y SCORES DETALLADOS
-        const teamWrapper = $('<div class="team-wrapper"></div>');
-        teamWrapper.css({
-            display: 'flex',
-            justifyContent: 'space-between',
-            alignItems: 'flex-start', // Alinea el contenido arriba
-            width: '100%',
-        });
-        
-        // 3. MOSTRAR NOMBRE DEL EQUIPO
-        teamWrapper.append(`<div class="team-name">${name}</div>`);
+                    render: function (container, teamData, score, state) {
 
-        // 4. CREAR CONTENEDOR DE SCORES DETALLADOS
-        const detailedScores = $('<div class="detailed-scores"></div>');
-        detailedScores.css({
-            display: 'flex',
-        });
+                        container.empty();
+
+
+                        let name = '';
+                        if (typeof teamData === 'object' && teamData !== null) {
+                            name = teamData.name || '';
+                        } else if (typeof teamData === 'string') {
+                            name = teamData || '';
+                        }
+
+                        container.append(`<div class="team-name" style="max-width: 90%; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;">${name}</div>`);
+
+                        setTimeout(() => {
+    const detailedMap = window.globalDetailedResultsMap || {};
+
+    // 1. Encontrar el contenedor del equipo (.team) que tiene data-teamid y envuelve todo.
+    // El 'container' es el div.label. Buscamos el ancestro más cercano que es .team.
+    const teamElement = $(container).closest('.team'); 
+
+    if (teamElement.length) {
+        // Obtener teamId (0 o 1) del elemento .team
+        const teamId = teamElement.data('teamid'); 
         
-        // Estilo base para cada caja de score (el "cuadro")
-        const boxStyle = {
-            display: 'flex',
-            alignItems: 'center',
-            justifyContent: 'center',
-            width: '20px', 
-            height: '18px', 
-            border: '1px solid #ccc',
-            fontWeight: 'bold',
-            fontSize: '0.8em', 
-            borderRadius: '2px',
-            backgroundColor: '#f9f9f9',
-            marginLeft: '5px' // Separación del nombre del equipo
-        };
-
-        // Valores por defecto para visualización
-        const s1Val = (set1 !== null && set1 !== undefined) ? set1 : '';
-        const s2Val = (set2 !== null && set2 !== undefined) ? set2 : '';
-        const tieVal = (tie !== null && tie !== undefined && tie !== '') ? tie : '';
+        // Obtener scoreElement (que tiene resultId)
+        const scoreElement = teamElement.find('.score');
         
-        // --- CREACIÓN DE LOS CUADROS ---
+        if (scoreElement.length) {
+            const resultId = scoreElement.data('resultid');
+            const scoreData = detailedMap[resultId];
 
-        // CUADRO 1: Set 1
-        const set1Box = $(`<span class="score-set1">${s1Val}</span>`).css(boxStyle);
-        detailedScores.append(set1Box);
+            if (scoreData) {
+                // 2. LÓGICA CRUCIAL para extraer SETS (basada en Paridad de resultId)
+                // resultId IMPAR (1, 3, 5...) = Slot A (usa claves set1A, set2A)
+                // resultId PAR (2, 4, 6...) = Slot B (usa claves set1B, set2B)
+                const idNumber = parseInt(resultId.split('-')[1]);
+                const isTeamASlot = idNumber % 2 !== 0; // True si es impar (Slot A)
 
-        // CUADRO 2: Set 2
-        const set2Box = $(`<span class="score-set2">${s2Val}</span>`).css(boxStyle);
-        detailedScores.append(set2Box);
+                let currentSet1, currentSet2, currentTie;
 
-        // CUADRO 3: Tie-break (solo si hay valor)
-        if (tieVal) {
-            const tieBox = $(`<span class="score-tiebreak">${tieVal}</span>`).css({
-                ...boxStyle,
-                backgroundColor: '#ffe0b2', 
-                borderColor: '#fb8c00'
-            });
-            detailedScores.append(tieBox);
-        }
-
-        teamWrapper.append(detailedScores);
-
-        // 5. AÑADIR EL WRAPPER AL CONTENEDOR PRINCIPAL
-        container.append(teamWrapper);
-        
-        // 6. Agregar badge de hora (Se mantiene el setTimeout para posicionar el badge)
-        if (time) {
-            setTimeout(() => {
-                const matchContainer = $(container).closest('.team').parent();
-                if (matchContainer.length && !matchContainer.find('.team-time-badge').length) {
-                    matchContainer.css('position', 'relative');
-                    
-                    // --- AJUSTE DE POSICIÓN DEL TIME BADGE ---
-                    // Lo movemos un poco a la derecha y ajustamos la altura (top: 30%)
-                    matchContainer.append(`<div class="team-time-badge" style="position:absolute;top:48%;right:-8%;transform:translate(0, -50%);background:#2563EB;color:white;padding:2px 6px;border-radius:8px;font-size:12px;z-index:1000;pointer-events:none;">${time}</div>`);
+                if (isTeamASlot) { 
+                    currentSet1 = scoreData.set1A;
+                    currentSet2 = scoreData.set2A;
+                    currentTie = scoreData.tieA;
+                } else { 
+                    currentSet1 = scoreData.set1B;
+                    currentSet2 = scoreData.set2B;
+                    currentTie = scoreData.tieB;
                 }
-            }, 0);
+
+                // A. Renderizar los sets
+                const $scoresContainer = $(container).find('.detailed-scores');
+                
+                // Usamos el DOM ya creado en la fase de render inicial
+                $scoresContainer.find('.score-set1').text(currentSet1 || '');
+                $scoresContainer.find('.score-set2').text(currentSet2 || '');
+
+                // Lógica opcional para Tiebreak
+                // if (currentTie && currentTie !== 0) { ... }
+                
+                // B. AGREGAR BADGE DE HORA
+                // Esto se ejecuta SÓLO si es el slot A (impar), garantizando que se dibuje solo una vez por partido
+                if (scoreData.time && isTeamASlot) { // ⬅️ Condición robusta final
+                    
+                    const time = scoreData.time;
+                    
+                    // Buscamos el contenedor del partido completo (.match)
+                    // teamElement (el .team) está dentro de .teamContainer, que está dentro de .match
+                    const matchContainer = teamElement.closest('.match'); 
+
+                    // Verificamos que el badge no exista antes de agregarlo
+                    if (matchContainer.length && !matchContainer.find('.team-time-badge').length) {
+                        matchContainer.append(`<div class="team-time-badge" style="position:absolute;top:48%;right:-8%;transform:translate(0, -50%);background:#2563EB;color:white;padding:2px 6px;border-radius:8px;font-size:12px;z-index:1000;pointer-events:none;">${time}</div>`);
+                    }
+                }
+            }
         }
-    },
-    
-    // El decorator.edit se mantiene sin cambios
-    edit: function (container, teamData, doneCb) {
-        const name = teamData ? teamData.name : "";
-        const extraData = teamData || {};
-
-        const input = $('<input type="text">');
-        input.val(name);
-        container.empty().append(input);
-        input.focus();
-
-        input.blur(() => {
-            doneCb({
-                ...extraData,
-                name: input.val()
-            });
-        });
     }
-}
+}, 0);
+                    },
+
+                    edit: function (container, teamData, doneCb) {
+                        let name = (typeof teamData === 'object' && teamData !== null) ? teamData.name || '' : teamData || '';
+
+                        const input = $('<input type="text">');
+                        input.val(name);
+                        container.empty().append(input);
+                        input.focus();
+
+                        input.blur(() => {
+                            doneCb(input.val());
+                        });
+                    }
+                }
             });
+
+
             setIsBracketLoaded(true);
         } else {
             setIsBracketLoaded(false);
@@ -446,7 +436,8 @@ function App() {
 
         // --- CONTENEDOR FIJO PRINCIPAL (Header, Sponsors, Nav) ---
         h('div', {
-            className: 'fixed top-0 left-0 w-full z-30 bg-white shadow-xl' // CLAVE: fixed top-0 w-full z-30
+            className: 'fixed top-0 left-0 w-full z-30 bg-white shadow-xl',
+            style: { zIndex: 9999999 }
         },
             // 1. HEADER (Título y Logo) - Quitamos sticky/top-0
             h('header', {
@@ -456,7 +447,7 @@ function App() {
                     className: 'flex items-center justify-center max-w-6xl mx-auto'
                 },
                     h('img', {
-                        src: 'images/logo.png',
+                        src: 'images/logo-padel.png',
                         alt: 'Logo ADYC',
                         className: 'h-12 w-auto mr-4 object-contain rounded-lg bg-white p-1'
                     }),

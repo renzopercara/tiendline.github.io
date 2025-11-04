@@ -321,75 +321,94 @@ export const LoadingSpinner = () => {
 };
 
 export const convertToBracketFormat = (matchData) => {
-    const phases = ["OCTAVOS", "CUARTOS", "SEMI", "FINAL"];
-    const groupedMatches = phases.reduce((acc, phase) => {
+    // Definición de fases y su ID (1: Octavos, 4: Final)
+    const phasesDefinition = [
+        { name: "OCTAVOS", id: 1 },
+        { name: "CUARTOS", id: 2 },
+        { name: "SEMI", id: 3 },
+        { name: "FINAL", id: 4 },
+    ];
+    const phasesNames = phasesDefinition.map(p => p.name);
+
+    const groupedMatches = phasesNames.reduce((acc, phase) => {
+        // Aseguramos ordenar por 'id' para que la indexación (resultId) coincida con el orden visual
         acc[phase] = matchData.filter(m => (m.group || '').toUpperCase() === phase).sort((a, b) => (a.id || 0) - (b.id || 0));
         return acc;
     }, {});
 
     const teams = [];
     const results = [];
+    const detailedResultsMap = {};
+    
+    // Contador secuencial, debe iniciar en 1
+    let resultIdCounter = 1; 
 
+    // --- 1. PROCESAR EQUIPOS INICIALES (teams) ---
     const initialRound = groupedMatches['OCTAVOS'];
 
     if (initialRound && initialRound.length > 0) {
         initialRound.forEach(match => {
-            let teamA = match.player1A ? match.player1A : null;
-            let teamB = match.player1B ? match.player1B : null;
+            // Unimos jugadores y guardamos los nombres para usar en el mapa
+            match.teamAName = match.player1A ? (match.player1A + (match.player2A ? `/${match.player2A}` : '')) : null;
+            match.teamBName = match.player1B ? (match.player1B + (match.player2B ? `/${match.player2B}` : '')) : null;
 
-            // --- INICIO: Creación de objetos de datos completos ---
-            const matchDetails = { // Datos que adjuntaremos a CADA EQUIPO del partido
-                time: match.time || null,
-                set1A: match.set1A || null,
-                set1B: match.set1B || null,
-                set2A: match.set2A || null,
-                set2B: match.set2B || null,
-                tieA: match.tiebreakA || null,
-                tieB: match.tiebreakB || null,
-            };
+            let teamAData = match.teamAName ? { name: match.teamAName } : null;
+            let teamBData = match.teamBName ? { name: match.teamBName } : null;
 
-            let teamAData = teamA ? { name: teamA, ...matchDetails } : null;
-            let teamBData = teamB ? { name: teamB, time: null } : null; // El tiempo solo lo adjuntamos al primer equipo para evitar duplicados en el badge.
-
-            // Sobrescribimos teamAData y teamBData con los sets específicos
-            if (teamAData) {
-                teamAData.set1 = match.set1A;
-                teamAData.set2 = match.set2A;
-                teamAData.tie = match.tiebreakA;
-            }
-            if (teamBData) {
-                teamBData.set1 = match.set1B;
-                teamBData.set2 = match.set2B;
-                teamBData.tie = match.tiebreakB;
-            }
-            
-            teams.push([teamAData, teamBData]); // Ahora pasamos objetos
-            // --- FIN: Creación de objetos de datos completos ---
+            teams.push([teamAData, teamBData]);
         });
     }
 
-    // ... (El cálculo de 'results' se mantiene igual, ya que solo necesita el conteo total de sets ganados)
+    // --- 2. PROCESAR RESULTADOS Y MAPA DETALLADO (results & detailedResultsMap) ---
+    phasesDefinition.forEach(phaseDef => {
+        const phaseName = phaseDef.name;
+        const phaseId = phaseDef.id; // 🔑 ID de Fase que se agregará al mapa
+        const roundMatches = groupedMatches[phaseName];
 
-    phases.forEach(phase => {
-        const roundMatches = groupedMatches[phase];
         if (roundMatches && roundMatches.length > 0) {
             const roundResults = roundMatches.map(match => {
                 let setsA = 0;
                 let setsB = 0;
-                // ... (Lógica de conteo de sets se mantiene igual)
+
+                // Definimos los nombres del equipo para el mapa (se usan en la depuración)
+                const teamAName = match.teamAName || (match.player1A ? (match.player1A + (match.player2A ? `/${match.player2A}` : '')) : `Match ${match.id} (A)`);
+                const teamBName = match.teamBName || (match.player1B ? (match.player1B + (match.player2B ? `/${match.player2B}` : '')) : `Match ${match.id} (B)`);
+
+
+                // Lógica de conteo de sets ganados (incluyendo tiebreak)
                 if ((parseInt(match.set1A) || 0) > (parseInt(match.set1B) || 0)) setsA++;
                 if ((parseInt(match.set1B) || 0) > (parseInt(match.set1A) || 0)) setsB++;
                 if ((parseInt(match.set2A) || 0) > (parseInt(match.set2B) || 0)) setsA++;
                 if ((parseInt(match.set2B) || 0) > (parseInt(match.set2A) || 0)) setsB++;
 
-                if (match.tiebreakA > match.tiebreakB) {
+                const tiebreakScoreA = parseInt(match.tiebreakA) || 0;
+                const tiebreakScoreB = parseInt(match.tiebreakB) || 0;
+
+                if (tiebreakScoreA > tiebreakScoreB) {
                     setsA++;
-                } else if (match.tiebreakB > match.tiebreakA) {
+                } else if (tiebreakScoreB > tiebreakScoreA) {
                     setsB++;
                 }
 
-                if (!match.set1A && !match.set1B) {
-                    return [null, null];
+                // 2.1. CREAR ENTRADAS EN EL MAPA DETALLADO
+                
+                // Mapear al Equipo A: resultId IMPAR (ej: result-1, result-3)
+                detailedResultsMap[`result-${resultIdCounter++}`] = {
+                    name: teamAName,
+                    phaseId: phaseId, // ⬅️ Nuevo campo Phase ID
+                    set1A: match.set1A, set2A: match.set2A, tieA: match.tiebreakA, time: match.time
+                };
+
+                // Mapear al Equipo B: resultId PAR (ej: result-2, result-4)
+                detailedResultsMap[`result-${resultIdCounter++}`] = {
+                    name: teamBName,
+                    phaseId: phaseId, // ⬅️ Nuevo campo Phase ID
+                    set1B: match.set1B, set2B: match.set2B, tieB: match.tiebreakB, time: match.time
+                };
+
+                // 2.2. DEVOLVER RESULTADO NUMÉRICO para 'results'
+                if (!match.set1A && !match.set1B && !match.set2A && !match.set2B && !match.scoreA && !match.scoreB) {
+                    return [null, null]; // Resultados nulos para partidos no jugados
                 }
 
                 return [setsA, setsB];
@@ -397,6 +416,9 @@ export const convertToBracketFormat = (matchData) => {
             results.push(roundResults);
         }
     });
+
+    // Hacemos el mapa accesible globalmente
+    window.globalDetailedResultsMap = detailedResultsMap;
 
     return { teams: teams, results: results };
 };

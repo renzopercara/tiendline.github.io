@@ -147,6 +147,6 @@ div.jQBracket .btm.bracket-match { border-bottom-width: 0; border-right-width: 0
   z-index: 5;
 }
 
-.score {
-    visibility: hidden !important; /* Capa extra de seguridad */
+#app > div > main > div > div:nth-child(3) > div > div > div > div:nth-child(4) > div:nth-child(1) > div.team-time-badge {
+    top: 100% !important;
 }
