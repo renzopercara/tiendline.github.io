@@ -92,7 +92,7 @@ export const SponsorsSlider = () => {
     // ------------------------------------------------------------------------------------
 
     // Altura del contenedor ajustada para 5 elementos (un poco más alto)
-    return h('div', { className: 'py-4 bg-gray-50 border-b border-gray-200 overflow-hidden' },
+    return h('div', { className: 'py-4 bg-gray-50 border-b border-gray-200 overflow-hidden', style: { backgroundColor: '#001142' } },
         h('div', { className: 'flex justify-center items-center h-24 sm:h-28 md:h-32 space-x-3 transition-all duration-500 ease-in-out' },
             sponsors.map((src, index) => {
                 

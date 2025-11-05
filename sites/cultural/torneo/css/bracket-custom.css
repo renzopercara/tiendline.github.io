@@ -168,3 +168,32 @@ div.jQBracket .btm.bracket-match { border-bottom-width: 0; border-right-width: 0
     line-height: 1.2;
     border-radius: 2px;
 }
+
+@keyframes wave-flow {
+        0% {
+            transform: translateX(-100%) scaleY(1) rotate(0deg); /* Empieza a la izquierda, escala normal */
+            opacity: 0.7;
+        }
+        25% {
+            transform: translateX(-50%) scaleY(1.05) rotate(2deg); /* Se mueve, crece un poco, rota */
+            opacity: 0.8;
+        }
+        50% {
+            transform: translateX(0%) scaleY(1) rotate(0deg); /* Centro, escala normal */
+            opacity: 0.7;
+        }
+        75% {
+            transform: translateX(50%) scaleY(0.95) rotate(-2deg); /* Se mueve más allá, encoge un poco, rota inverso */
+            opacity: 0.8;
+        }
+        100% {
+            transform: translateX(100%) scaleY(1) rotate(0deg); /* Termina a la derecha, escala normal */
+            opacity: 0.7;
+        }
+    }
+
+    /* Clase de Animación para Tailwind */
+    .animate-wave-flow {
+        animation: wave-flow 15s ease-in-out infinite; /* Más lento, suave, repetido */
+        /* background-size: 200% 100%;  Asegura que el gradiente sea lo suficientemente grande para moverse */
+    }

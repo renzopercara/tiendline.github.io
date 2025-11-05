@@ -27,109 +27,109 @@ const JQueryBracketView = ({ initialData }) => {
             $(bracketRef.current).empty();
 
             // Uso Mínimo como en el ejemplo:
-                $(bracketRef.current).bracket({
-                    init: initialData,
-                    teamWidth: 200,
-                    scoreWidth: 30,
-                    matchMargin: 40,
-                    roundMargin: 50,
-                    decorator: {
-                        render: function (container, teamData, score, state) {
+            $(bracketRef.current).bracket({
+                init: initialData,
+                teamWidth: 200,
+                scoreWidth: 30,
+                matchMargin: 40,
+                roundMargin: 50,
+                decorator: {
+                    render: function (container, teamData, score, state) {
 
-                            container.empty();
+                        container.empty();
 
 
-                            let name = '';
-                            if (typeof teamData === 'object' && teamData !== null) {
-                                name = teamData.name || '';
-                            } else if (typeof teamData === 'string') {
-                                name = teamData || '';
-                            }
+                        let name = '';
+                        if (typeof teamData === 'object' && teamData !== null) {
+                            name = teamData.name || '';
+                        } else if (typeof teamData === 'string') {
+                            name = teamData || '';
+                        }
 
-                            container.append(`<div class="team-name" style="max-width: 90%; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;">${name}</div>`);
+                        container.append(`<div class="team-name" style="max-width: 90%; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;">${name}</div>`);
 
-                            setTimeout(() => {
-                                const detailedMap = window.globalDetailedResultsMap || {};
+                        setTimeout(() => {
+                            const detailedMap = window.globalDetailedResultsMap || {};
 
-                                // 1. Encontrar el contenedor del equipo (.team) que tiene data-teamid y envuelve todo.
-                                // El 'container' es el div.label. Buscamos el ancestro más cercano que es .team.
-                                const teamElement = $(container).closest('.team');
+                            // 1. Encontrar el contenedor del equipo (.team) que tiene data-teamid y envuelve todo.
+                            // El 'container' es el div.label. Buscamos el ancestro más cercano que es .team.
+                            const teamElement = $(container).closest('.team');
 
-                                if (teamElement.length) {
-                                    // Obtener teamId (0 o 1) del elemento .team
-                                    const teamId = teamElement.data('teamid');
+                            if (teamElement.length) {
+                                // Obtener teamId (0 o 1) del elemento .team
+                                const teamId = teamElement.data('teamid');
 
-                                    // Obtener scoreElement (que tiene resultId)
-                                    const scoreElement = teamElement.find('.score');
+                                // Obtener scoreElement (que tiene resultId)
+                                const scoreElement = teamElement.find('.score');
 
-                                    if (scoreElement.length) {
-                                        const resultId = scoreElement.data('resultid');
-                                        const scoreData = detailedMap[resultId];
+                                if (scoreElement.length) {
+                                    const resultId = scoreElement.data('resultid');
+                                    const scoreData = detailedMap[resultId];
 
-                                        if (scoreData) {
-                                            // 2. LÓGICA CRUCIAL para extraer SETS (basada en Paridad de resultId)
-                                            // resultId IMPAR (1, 3, 5...) = Slot A (usa claves set1A, set2A)
-                                            // resultId PAR (2, 4, 6...) = Slot B (usa claves set1B, set2B)
-                                            const idNumber = parseInt(resultId.split('-')[1]);
-                                            const isTeamASlot = idNumber % 2 !== 0; // True si es impar (Slot A)
+                                    if (scoreData) {
+                                        // 2. LÓGICA CRUCIAL para extraer SETS (basada en Paridad de resultId)
+                                        // resultId IMPAR (1, 3, 5...) = Slot A (usa claves set1A, set2A)
+                                        // resultId PAR (2, 4, 6...) = Slot B (usa claves set1B, set2B)
+                                        const idNumber = parseInt(resultId.split('-')[1]);
+                                        const isTeamASlot = idNumber % 2 !== 0; // True si es impar (Slot A)
 
-                                            let currentSet1, currentSet2, currentTie;
+                                        let currentSet1, currentSet2, currentTie;
 
-                                            if (isTeamASlot) {
-                                                currentSet1 = scoreData.set1A;
-                                                currentSet2 = scoreData.set2A;
-                                                currentTie = scoreData.tieA;
-                                            } else {
-                                                currentSet1 = scoreData.set1B;
-                                                currentSet2 = scoreData.set2B;
-                                                currentTie = scoreData.tieB;
-                                            }
+                                        if (isTeamASlot) {
+                                            currentSet1 = scoreData.set1A;
+                                            currentSet2 = scoreData.set2A;
+                                            currentTie = scoreData.tieA;
+                                        } else {
+                                            currentSet1 = scoreData.set1B;
+                                            currentSet2 = scoreData.set2B;
+                                            currentTie = scoreData.tieB;
+                                        }
 
-                                            // A. Renderizar los sets
-                                            const $scoresContainer = $(container).find('.detailed-scores');
+                                        // A. Renderizar los sets
+                                        const $scoresContainer = $(container).find('.detailed-scores');
 
-                                            // Usamos el DOM ya creado en la fase de render inicial
-                                            $scoresContainer.find('.score-set1').text(currentSet1 || '');
-                                            $scoresContainer.find('.score-set2').text(currentSet2 || '');
+                                        // Usamos el DOM ya creado en la fase de render inicial
+                                        $scoresContainer.find('.score-set1').text(currentSet1 || '');
+                                        $scoresContainer.find('.score-set2').text(currentSet2 || '');
 
-                                            // Lógica opcional para Tiebreak
-                                            // if (currentTie && currentTie !== 0) { ... }
+                                        // Lógica opcional para Tiebreak
+                                        // if (currentTie && currentTie !== 0) { ... }
 
-                                            // B. AGREGAR BADGE DE HORA
-                                            // Esto se ejecuta SÓLO si es el slot A (impar), garantizando que se dibuje solo una vez por partido
-                                            if (scoreData.time && isTeamASlot) { // ⬅️ Condición robusta final
+                                        // B. AGREGAR BADGE DE HORA
+                                        // Esto se ejecuta SÓLO si es el slot A (impar), garantizando que se dibuje solo una vez por partido
+                                        if (scoreData.time && isTeamASlot) { // ⬅️ Condición robusta final
 
-                                                const time = scoreData.time;
+                                            const time = scoreData.time;
 
-                                                // Buscamos el contenedor del partido completo (.match)
-                                                // teamElement (el .team) está dentro de .teamContainer, que está dentro de .match
-                                                const matchContainer = teamElement.closest('.match');
+                                            // Buscamos el contenedor del partido completo (.match)
+                                            // teamElement (el .team) está dentro de .teamContainer, que está dentro de .match
+                                            const matchContainer = teamElement.closest('.match');
 
-                                                // Verificamos que el badge no exista antes de agregarlo
-                                                if (matchContainer.length && !matchContainer.find('.team-time-badge').length) {
-                                                    matchContainer.append(`<div class="team-time-badge" style="position:absolute;top:48%;right:16%;transform:translate(0, -50%);background:#2563EB;color:white;padding:2px 6px;border-radius:8px;font-size:12px;z-index:1000;pointer-events:none;">${time}</div>`);
-                                                }
+                                            // Verificamos que el badge no exista antes de agregarlo
+                                            if (matchContainer.length && !matchContainer.find('.team-time-badge').length) {
+                                                matchContainer.append(`<div class="team-time-badge" style="position:absolute;top:48%;right:16%;transform:translate(0, -50%);background:#2563EB;color:white;padding:2px 6px;border-radius:8px;font-size:12px;z-index:1000;pointer-events:none;">${time}</div>`);
                                             }
                                         }
                                     }
                                 }
-                            }, 0);
-                        },
+                            }
+                        }, 0);
+                    },
 
-                        edit: function (container, teamData, doneCb) {
-                            let name = (typeof teamData === 'object' && teamData !== null) ? teamData.name || '' : teamData || '';
+                    edit: function (container, teamData, doneCb) {
+                        let name = (typeof teamData === 'object' && teamData !== null) ? teamData.name || '' : teamData || '';
 
-                            const input = $('<input type="text">');
-                            input.val(name);
-                            container.empty().append(input);
-                            input.focus();
+                        const input = $('<input type="text">');
+                        input.val(name);
+                        container.empty().append(input);
+                        input.focus();
 
-                            input.blur(() => {
-                                doneCb(input.val());
-                            });
-                        }
+                        input.blur(() => {
+                            doneCb(input.val());
+                        });
                     }
-                });
+                }
+            });
 
 
             setIsBracketLoaded(true);
@@ -267,7 +267,7 @@ const TournamentDetails = ({ data, firebaseStandings }) => {
 };
 
 const TournamentContent = ({ data, standings, db, userId }) => (
-    h('div', { className: 'p-4 sm:p-6 bg-white rounded-lg shadow-inner mt-[110px]' },
+    h('div', { className: 'p-4 sm:p-6 bg-white rounded-lg shadow-inner mt-[70px]' },
         h('div', { className: 'flex items-center justify-center mb-4' },
             h('div', { className: 'text-5xl mr-3' }, data.icon),
             h('h3', { className: 'text-2 font-extrabold text-gray-800' }, data.fullTitle)
@@ -441,23 +441,51 @@ function App() {
         },
             // 1. HEADER (Título y Logo) - Quitamos sticky/top-0
             h('header', {
-                className: 'bg-indigo-800 text-white p-4 shadow-2xl'
+                // Fijo arriba (sticky) y sombra oscura. Usamos un color base azul muy oscuro.
+                // Añadimos 'overflow-hidden' para contener la animación de fondo.
+                className: 'sticky top-0 z-30 shadow-2xl border-b border-blue-900/50 p-4 transition-all duration-300 overflow-hidden bg-blue-900'
             },
+                // --- Capa de la Animación de Fondo Sutil ---
                 h('div', {
-                    className: 'flex items-center justify-center max-w-6xl mx-auto'
+                    // Un gradiente que va de un azul oscuro a un azul más claro, y de nuevo al oscuro.
+                    // Usa animate-pulse que es de Tailwind CDN y da un sutil efecto de "respiración".
+                    className: 'absolute inset-0 bg-gradient-to-r from-blue-900 via-blue-700 to-blue-900 opacity-50 animate-pulse'
+                }),
+
+                h('div', {
+                    className: 'relative max-w-6xl mx-auto py-1 px-4 sm:px-6 lg:px-8 flex items-center justify-between'
                 },
-                    h('img', {
-                        src: 'images/logo-padel.png',
-                        alt: 'Logo ADYC',
-                        className: 'h-12 w-auto mr-4 object-contain rounded-lg bg-white p-1'
-                    }),
-                    h('div', { className: 'text-center' },
+                    // A. Logo y Título
+                    h('div', { className: 'flex items-center space-x-3 sm:space-x-4' },
+                        // Logo
+                        h('img', {
+                            src: 'images/logo-padel.png',
+                            alt: 'Logo ADYC',
+                            className: 'h-10 w-auto object-contain bg-white rounded-lg p-1 shadow-md transition-transform hover:scale-105'
+                        }),
+
+                        // Título Único (Todo en un solo h1)
                         h('h1', {
-                            className: 'text-3xl font-extrabold tracking-tight md:text-4xl'
-                        }, 'Torneo de Padel ADYC'),
-                        h('p', {
-                            className: 'text-sm text-indigo-300 mt-1'
-                        }, 'Actualizaciones y Resultados en Vivo')
+                            // Combinamos el título principal con un texto secundario más pequeño, todo en blanco
+                            className: 'text-xl sm:text-2xl font-black tracking-tight text-white flex items-center space-x-2'
+                        },
+                            // 1. Título principal
+                            h('span', null, 'Torneo de Padel ADYC'),
+
+                            // 2. Separador visual (opcional)
+                            h('span', { className: 'text-sm text-blue-300 hidden sm:inline' }, '|'),
+
+                            // 3. Texto secundario (más pequeño y discreto)
+                            h('span', { className: 'text-base font-semibold text-blue-300 hidden sm:inline' }, 'Resultados en Vivo')
+                        )
+                    ),
+
+                    // B. Elemento Dinámico 'Live'
+                    h('div', { className: 'text-right hidden sm:block' },
+                        // Etiqueta 'Live' con fondo blanco/semitransparente y pulso para indicar actividad
+                        h('span', {
+                            className: 'text-sm font-extrabold text-blue-800 bg-white/90 px-3 py-1 rounded-full shadow-inner animate-pulse'
+                        }, 'LIVE')
                     )
                 )
             ),
