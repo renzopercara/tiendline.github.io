@@ -1,7 +1,6 @@
 
 export const calculateStandings = (matchData) => {
     const standingsMap = new Map();
-
     const updateScore = (playerName, score) => {
         if (!playerName) return;
         const currentScore = standingsMap.get(playerName) || 0;
@@ -11,14 +10,12 @@ export const calculateStandings = (matchData) => {
     for (const match of matchData) {
         const scoreA = parseInt(match.scoreA) || 0;
         const scoreB = parseInt(match.scoreB) || 0;
-        
-        if (scoreA > 0 || scoreB > 0) {
-            updateScore(match.player1A, scoreA);
-            updateScore(match.player2A, scoreA);
-            
-            updateScore(match.player1B, scoreB);
-            updateScore(match.player2B, scoreB);
-        }
+
+        updateScore(match.player1A, scoreA);
+        updateScore(match.player2A, scoreA);
+
+        updateScore(match.player1B, scoreB);
+        updateScore(match.player2B, scoreB);
     }
 
     let standingsArray = Array.from(standingsMap, ([name, score]) => ({ name, score }));
@@ -38,7 +35,7 @@ export const calculateStandings = (matchData) => {
 
         for (let i = 0; i < standingsArray.length; i++) {
             const item = standingsArray[i];
-            
+
             if (item.score < lastScore) {
                 currentRank = i + 1;
             }

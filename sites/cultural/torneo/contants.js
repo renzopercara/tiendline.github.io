@@ -12,10 +12,10 @@ export const tournamentData = [
     },
     { 
         id: 1, 
-        name: 'Suma 14 ♀️', 
-        fullTitle: "Torneo Suma 14 - Categoría Mujeres",
+        name: '7° ♀️', 
+        fullTitle: "Torneo 7° - Categoría Mujeres",
         icon: '♀️',
-        description: "Aquí se mostrarán los datos detallados y las rondas del Torneo Suma 14 de Mujeres (Damas).",
+        description: "Aquí se mostrarán los datos detallados y las rondas del Torneo 7° de Mujeres (Damas).",
     },
     { 
         id: 2, 

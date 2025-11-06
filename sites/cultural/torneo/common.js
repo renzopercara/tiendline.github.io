@@ -236,6 +236,8 @@ export const PlayerChip = ({ name, positionMap, showRank = true, isWinner = null
 
 export const MatchesView = ({ matches, standings, isNormalTournament = false }) => {
     const matchRefs = useRef([]);
+    const OFFSET_PX = 300;
+
     useEffect(() => {
         if (matches.length > 0) {
             const isPending = (match) => isNormalTournament
@@ -244,14 +246,28 @@ export const MatchesView = ({ matches, standings, isNormalTournament = false }) 
 
             const firstPendingIndex = matches.findIndex(isPending);
 
+            let targetElement = null;
+
             if (firstPendingIndex !== -1 && matchRefs.current[firstPendingIndex]) {
-                const scrollIndex = Math.max(0, firstPendingIndex - 3);
-                matchRefs.current[scrollIndex].scrollIntoView({ behavior: 'smooth', block: 'start' });
+                const scrollIndex = Math.max(0, firstPendingIndex);
+                targetElement = matchRefs.current[scrollIndex];
             } else if (matchRefs.current[0]) {
-                matchRefs.current[0].scrollIntoView({ behavior: 'smooth', block: 'start' });
+                targetElement = matchRefs.current[0];
+            }
+
+            if (targetElement) {
+                const elementPosition = targetElement.getBoundingClientRect().top;
+                const offsetPosition = window.scrollY + elementPosition - OFFSET_PX;
+
+                window.scrollTo({
+                    top: offsetPosition,
+                    behavior: 'smooth'
+                });
             }
         }
-        matchRefs.current = [];
+        return () => {
+            matchRefs.current = [];
+        };
     }, [matches, isNormalTournament]);
 
     return h('div', { className: 'space-y-4' },
@@ -286,7 +302,7 @@ export const PlayerTable = ({ standings, showRank = true }) => {
                         standings.map((s, index) => h('tr', { key: s.name, className: index % 2 === 0 ? 'bg-white' : 'bg-gray-50' },
                             showRank ? h('td', { className: 'px-3 py-4 whitespace-nowrap text-sm font-medium text-gray-900' }, index + 1) : null,
                             h('td', { className: 'px-3 py-4 whitespace-nowrap text-sm text-gray-700' }, s.name),
-                            h('td', { className: 'px-3 py-4 whitespace-nowrap text-sm text-gray-900 font-semibold text-right' }, s.score || s.points)
+                            h('td', { className: 'px-3 py-4 whitespace-nowrap text-sm text-gray-900 font-semibold text-right' }, s.score || s.points || 0)
                         ))
                     )
                 )
@@ -321,7 +337,7 @@ export const LoadingSpinner = () => {
 };
 
 export const convertToBracketFormat = (matchData) => {
-    // Definición de fases y su ID (1: Octavos, 4: Final)
+    // Definición de fases y su ID
     const phasesDefinition = [
         { name: "OCTAVOS", id: 1 },
         { name: "CUARTOS", id: 2 },
@@ -330,8 +346,8 @@ export const convertToBracketFormat = (matchData) => {
     ];
     const phasesNames = phasesDefinition.map(p => p.name);
 
+    // Agrupación de partidos por fase (igual que antes)
     const groupedMatches = phasesNames.reduce((acc, phase) => {
-        // Aseguramos ordenar por 'id' para que la indexación (resultId) coincida con el orden visual
         acc[phase] = matchData.filter(m => (m.group || '').toUpperCase() === phase).sort((a, b) => (a.id || 0) - (b.id || 0));
         return acc;
     }, {});
@@ -339,30 +355,62 @@ export const convertToBracketFormat = (matchData) => {
     const teams = [];
     const results = [];
     const detailedResultsMap = {};
+    let resultIdCounter = 1;
+
+    // --- LÓGICA DE SALTO DE FASE ---
+    const octavosMatches = groupedMatches['OCTAVOS'];
+    const cuartosMatches = groupedMatches['CUARTOS'];
     
-    // Contador secuencial, debe iniciar en 1
-    let resultIdCounter = 1; 
+    // 🔑 CLAVE: Determinar la fase inicial para el bracket
+    let initialPhaseMatches;
+    
+    // 1. Si hay partidos en Octavos, esa es nuestra ronda inicial.
+    if (octavosMatches && octavosMatches.length > 0) {
+        initialPhaseMatches = octavosMatches;
+    } 
+    // 2. Si NO hay Octavos, pero SÍ hay partidos en Cuartos, Cuartos es la ronda inicial.
+    else if (cuartosMatches && cuartosMatches.length > 0) {
+        initialPhaseMatches = cuartosMatches;
+    } 
+    // 3. En cualquier otro caso, la inicial es vacía.
+    else {
+        initialPhaseMatches = [];
+    }
+    // ------------------------------------
 
     // --- 1. PROCESAR EQUIPOS INICIALES (teams) ---
-    const initialRound = groupedMatches['OCTAVOS'];
-
-    if (initialRound && initialRound.length > 0) {
-        initialRound.forEach(match => {
-            // Unimos jugadores y guardamos los nombres para usar en el mapa
+    // Usamos la ronda inicial determinada arriba (Octavos O Cuartos)
+    if (initialPhaseMatches.length > 0) {
+        initialPhaseMatches.forEach(match => {
+            // ... (lógica existente de nombres)
             match.teamAName = match.player1A ? (match.player1A + (match.player2A ? `/${match.player2A}` : '')) : null;
             match.teamBName = match.player1B ? (match.player1B + (match.player2B ? `/${match.player2B}` : '')) : null;
 
             let teamAData = match.teamAName ? { name: match.teamAName } : null;
             let teamBData = match.teamBName ? { name: match.teamBName } : null;
 
-            teams.push([teamAData, teamBData]);
+            // Usar 'TBD' (To Be Determined) si el equipo es nulo, para asegurar que el plugin funcione
+            teams.push([teamAData || 'TBD', teamBData || 'TBD']); 
         });
     }
 
     // --- 2. PROCESAR RESULTADOS Y MAPA DETALLADO (results & detailedResultsMap) ---
-    phasesDefinition.forEach(phaseDef => {
+    
+    // 🔑 CLAVE: Determinar qué fases vamos a incluir en el array 'results'
+    let phasesToProcess;
+    
+    if (octavosMatches && octavosMatches.length > 0) {
+        // Incluir todas las fases si Octavos tiene partidos
+        phasesToProcess = phasesDefinition; 
+    } else {
+        // Excluir Octavos (id: 1) si está vacío.
+        phasesToProcess = phasesDefinition.filter(p => p.id > 1);
+    }
+
+
+    phasesToProcess.forEach(phaseDef => {
         const phaseName = phaseDef.name;
-        const phaseId = phaseDef.id; // 🔑 ID de Fase que se agregará al mapa
+        const phaseId = phaseDef.id;
         const roundMatches = groupedMatches[phaseName];
 
         if (roundMatches && roundMatches.length > 0) {
@@ -370,12 +418,8 @@ export const convertToBracketFormat = (matchData) => {
                 let setsA = 0;
                 let setsB = 0;
 
-                // Definimos los nombres del equipo para el mapa (se usan en la depuración)
-                const teamAName = match.teamAName || (match.player1A ? (match.player1A + (match.player2A ? `/${match.player2A}` : '')) : `Match ${match.id} (A)`);
-                const teamBName = match.teamBName || (match.player1B ? (match.player1B + (match.player2B ? `/${match.player2B}` : '')) : `Match ${match.id} (B)`);
+                // ... (lógica existente de conteo de sets y tiebreak) ...
 
-
-                // Lógica de conteo de sets ganados (incluyendo tiebreak)
                 if ((parseInt(match.set1A) || 0) > (parseInt(match.set1B) || 0)) setsA++;
                 if ((parseInt(match.set1B) || 0) > (parseInt(match.set1A) || 0)) setsB++;
                 if ((parseInt(match.set2A) || 0) > (parseInt(match.set2B) || 0)) setsA++;
@@ -389,26 +433,24 @@ export const convertToBracketFormat = (matchData) => {
                 } else if (tiebreakScoreB > tiebreakScoreA) {
                     setsB++;
                 }
-
-                // 2.1. CREAR ENTRADAS EN EL MAPA DETALLADO
                 
-                // Mapear al Equipo A: resultId IMPAR (ej: result-1, result-3)
+                // --- Mapeo Detallado (Se mantiene igual) ---
+                const teamAName = match.teamAName || (match.player1A ? (match.player1A + (match.player2A ? `/${match.player2A}` : '')) : `Match ${match.id} (A)`);
+                const teamBName = match.teamBName || (match.player1B ? (match.player1B + (match.player2B ? `/${match.player2B}` : '')) : `Match ${match.id} (B)`);
+                
+                // Mapear al Equipo A: resultId IMPAR
                 detailedResultsMap[`result-${resultIdCounter++}`] = {
-                    name: teamAName,
-                    phaseId: phaseId, // ⬅️ Nuevo campo Phase ID
-                    set1A: match.set1A, set2A: match.set2A, tieA: match.tiebreakA, time: match.time
+                    name: teamAName, phaseId: phaseId, set1A: match.set1A, set2A: match.set2A, tieA: match.tiebreakA, time: match.time
                 };
 
-                // Mapear al Equipo B: resultId PAR (ej: result-2, result-4)
+                // Mapear al Equipo B: resultId PAR
                 detailedResultsMap[`result-${resultIdCounter++}`] = {
-                    name: teamBName,
-                    phaseId: phaseId, // ⬅️ Nuevo campo Phase ID
-                    set1B: match.set1B, set2B: match.set2B, tieB: match.tiebreakB, time: match.time
+                    name: teamBName, phaseId: phaseId, set1B: match.set1B, set2B: match.set2B, tieB: match.tiebreakB, time: match.time
                 };
-
-                // 2.2. DEVOLVER RESULTADO NUMÉRICO para 'results'
+                
+                // Devolver el resultado numérico para 'results'
                 if (!match.set1A && !match.set1B && !match.set2A && !match.set2B && !match.scoreA && !match.scoreB) {
-                    return [null, null]; // Resultados nulos para partidos no jugados
+                    return [null, null];
                 }
 
                 return [setsA, setsB];
