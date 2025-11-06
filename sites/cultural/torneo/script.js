@@ -10,7 +10,7 @@ import { MatchesView, PlayerTable, LoadingSpinner, convertToBracketFormat } from
 import { SponsorsSlider } from "./SponsorSlider.js";
 import { Facebook, Instagram, Linkedin } from "lucide-preact";
 
-const JQueryBracketView = ({ initialData }) => {
+const JQueryBracketView = ({ initialData, bracketType }) => {
     const bracketRef = useRef(null);
     const [isBracketLoaded, setIsBracketLoaded] = useState(false);
     const dataKey = JSON.stringify(initialData);
@@ -26,6 +26,10 @@ const JQueryBracketView = ({ initialData }) => {
 
             $(bracketRef.current).empty();
 
+            const containerElement = $(bracketRef.current);
+
+            containerElement.addClass('bracket-contenedor').attr('id', `bracket-${bracketType}`);
+
             // Uso Mínimo como en el ejemplo:
             $(bracketRef.current).bracket({
                 init: initialData,
@@ -38,40 +42,58 @@ const JQueryBracketView = ({ initialData }) => {
 
                         container.empty();
 
-
+                        // Lógica de renderizado del nombre del equipo (se mantiene igual)
                         let name = '';
                         if (typeof teamData === 'object' && teamData !== null) {
                             name = teamData.name || '';
                         } else if (typeof teamData === 'string') {
                             name = teamData || '';
                         }
-
                         container.append(`<div class="team-name" style="max-width: 90%; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;">${name}</div>`);
 
+                        window.currentResultIdCounter = window.currentResultIdCounter || 1;
                         setTimeout(() => {
                             const detailedMap = window.globalDetailedResultsMap || {};
-
-                            // 1. Encontrar el contenedor del equipo (.team) que tiene data-teamid y envuelve todo.
-                            // El 'container' es el div.label. Buscamos el ancestro más cercano que es .team.
                             const teamElement = $(container).closest('.team');
 
                             if (teamElement.length) {
-                                // Obtener teamId (0 o 1) del elemento .team
-                                const teamId = teamElement.data('teamid');
-
                                 // Obtener scoreElement (que tiene resultId)
                                 const scoreElement = teamElement.find('.score');
 
                                 if (scoreElement.length) {
-                                    const resultId = scoreElement.data('resultid');
+                                    let resultId = scoreElement.data('resultid');
+
+                                    if (!resultId) {
+                                        const id = parseInt(window.currentResultIdCounter.split('-')[1]) + 1
+                                        resultId = `result-${id}`;
+                                        window.currentResultIdCounter = resultId;
+                                    } else {
+                                        window.currentResultIdCounter = resultId;
+                                    }
+
                                     const scoreData = detailedMap[resultId];
 
+                                    // 1. 🔑 DEFINICIÓN CLAVE: Determinar si es el Slot A (impar)
+                                    const idNumber = parseInt(resultId.split('-')[1]);
+                                    const isTeamASlot = idNumber % 2 !== 0;
+
+                                    // --- LÓGICA DE HORA (SIEMPRE VISIBLE) ---
+                                    // Se ejecuta si hay datos y si es el slot A (impar), para dibujar solo una vez por partido.
+                                    if (scoreData && scoreData.time && isTeamASlot) {
+                                        const time = scoreData.time;
+
+                                        // Buscamos el contenedor del partido completo (.match)
+                                        const matchContainer = teamElement.closest('.match');
+
+                                        // Agregamos el badge de la hora si aún no existe en el contenedor del partido
+                                        if (matchContainer.length && !matchContainer.find('.team-time-badge').length) {
+                                            matchContainer.append(`<div class="team-time-badge" style="position:absolute;top:48%;right:16%;transform:translate(0, -50%);background:#2563EB;color:white;padding:2px 6px;border-radius:8px;font-size:12px;z-index:1000;pointer-events:none;">${time}</div>`);
+                                        }
+                                    }
+                                    // ------------------------------------------
+
                                     if (scoreData) {
-                                        // 2. LÓGICA CRUCIAL para extraer SETS (basada en Paridad de resultId)
-                                        // resultId IMPAR (1, 3, 5...) = Slot A (usa claves set1A, set2A)
-                                        // resultId PAR (2, 4, 6...) = Slot B (usa claves set1B, set2B)
-                                        const idNumber = parseInt(resultId.split('-')[1]);
-                                        const isTeamASlot = idNumber % 2 !== 0; // True si es impar (Slot A)
+                                        // --- LÓGICA DE RESULTADOS Y SETS (Solo si hay scoreData) ---
 
                                         let currentSet1, currentSet2, currentTie;
 
@@ -85,31 +107,15 @@ const JQueryBracketView = ({ initialData }) => {
                                             currentTie = scoreData.tieB;
                                         }
 
-                                        // A. Renderizar los sets
+                                        // Renderizar los sets
                                         const $scoresContainer = $(container).find('.detailed-scores');
 
                                         // Usamos el DOM ya creado en la fase de render inicial
                                         $scoresContainer.find('.score-set1').text(currentSet1 || '');
                                         $scoresContainer.find('.score-set2').text(currentSet2 || '');
 
-                                        // Lógica opcional para Tiebreak
+                                        // Lógica opcional para Tiebreak (si tienes elementos para esto)
                                         // if (currentTie && currentTie !== 0) { ... }
-
-                                        // B. AGREGAR BADGE DE HORA
-                                        // Esto se ejecuta SÓLO si es el slot A (impar), garantizando que se dibuje solo una vez por partido
-                                        if (scoreData.time && isTeamASlot) { // ⬅️ Condición robusta final
-
-                                            const time = scoreData.time;
-
-                                            // Buscamos el contenedor del partido completo (.match)
-                                            // teamElement (el .team) está dentro de .teamContainer, que está dentro de .match
-                                            const matchContainer = teamElement.closest('.match');
-
-                                            // Verificamos que el badge no exista antes de agregarlo
-                                            if (matchContainer.length && !matchContainer.find('.team-time-badge').length) {
-                                                matchContainer.append(`<div class="team-time-badge" style="position:absolute;top:48%;right:16%;transform:translate(0, -50%);background:#2563EB;color:white;padding:2px 6px;border-radius:8px;font-size:12px;z-index:1000;pointer-events:none;">${time}</div>`);
-                                            }
-                                        }
                                     }
                                 }
                             }
@@ -117,6 +123,7 @@ const JQueryBracketView = ({ initialData }) => {
                     },
 
                     edit: function (container, teamData, doneCb) {
+                        // Lógica de edición (se mantiene igual)
                         let name = (typeof teamData === 'object' && teamData !== null) ? teamData.name || '' : teamData || '';
 
                         const input = $('<input type="text">');
@@ -249,7 +256,7 @@ const TournamentDetails = ({ data, firebaseStandings }) => {
             // CAMBIO 3: Incluir data.id === 2 para SUMA 13 Hombres, usando las mismas vistas que SUMA 14
             content = subTab === 0
                 ? h(Sum14ClassificationView, { matchData: matchData })
-                : h(JQueryBracketView, { initialData: convertToBracketFormat(matchData) });
+                : h(JQueryBracketView, { initialData: convertToBracketFormat(matchData), bracketType: data.id === 1 ? 'SUMA14' : 'SUMA13'});
         } else {
             content = subTab === 1
                 ? h(PlayerTable, { standings: firebaseStandings, showRank: true })

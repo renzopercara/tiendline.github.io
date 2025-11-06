@@ -197,3 +197,15 @@ div.jQBracket .btm.bracket-match { border-bottom-width: 0; border-right-width: 0
         animation: wave-flow 15s ease-in-out infinite; /* Más lento, suave, repetido */
         /* background-size: 200% 100%;  Asegura que el gradiente sea lo suficientemente grande para moverse */
     }
+
+    #bracket-SUMA13 > div > div > div:nth-child(4) > div:nth-child(2) > div.team-time-badge {
+        display: none !important;
+    }
+
+    #bracket-SUMA14 > div > div > div:nth-child(3) > div:nth-child(1) > div.team-time-badge {
+        top: 100% !important;
+    }
+
+    #bracket-SUMA14 > div > div > div:nth-child(3) > div:nth-child(2) > div.team-time-badge {
+        display: none !important;
+    }

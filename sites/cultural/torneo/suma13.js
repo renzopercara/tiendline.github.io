@@ -136,7 +136,7 @@ export const Suma13ClassificationView = ({ matchData }) => {
     const groups = [...new Set(matchData
         .map(match => match.group)
         .filter(group => group && !FINAL_PHASE_GROUPS.includes(group.toUpperCase()))
-    )];
+    )].sort((a, b) => a.localeCompare(b));;
 
     const [selectedGroup, setSelectedGroup] = useState(groups[0] || 'N/A');
 

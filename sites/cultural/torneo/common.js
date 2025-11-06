@@ -337,7 +337,7 @@ export const LoadingSpinner = () => {
 };
 
 export const convertToBracketFormat = (matchData) => {
-    // Definición de fases y su ID
+    // Definición de fases
     const phasesDefinition = [
         { name: "OCTAVOS", id: 1 },
         { name: "CUARTOS", id: 2 },
@@ -346,7 +346,7 @@ export const convertToBracketFormat = (matchData) => {
     ];
     const phasesNames = phasesDefinition.map(p => p.name);
 
-    // Agrupación de partidos por fase (igual que antes)
+    // Agrupación de partidos por fase (ordenados por ID)
     const groupedMatches = phasesNames.reduce((acc, phase) => {
         acc[phase] = matchData.filter(m => (m.group || '').toUpperCase() === phase).sort((a, b) => (a.id || 0) - (b.id || 0));
         return acc;
@@ -355,55 +355,47 @@ export const convertToBracketFormat = (matchData) => {
     const teams = [];
     const results = [];
     const detailedResultsMap = {};
+    const scheduleByResultMap = {}; // 🔑 NUEVO MAPA: Horario por Result ID para mostrarlo siempre
     let resultIdCounter = 1;
 
     // --- LÓGICA DE SALTO DE FASE ---
     const octavosMatches = groupedMatches['OCTAVOS'];
     const cuartosMatches = groupedMatches['CUARTOS'];
     
-    // 🔑 CLAVE: Determinar la fase inicial para el bracket
     let initialPhaseMatches;
     
-    // 1. Si hay partidos en Octavos, esa es nuestra ronda inicial.
+    // Si hay Octavos, usamos Octavos. Si no hay, pero sí Cuartos, usamos Cuartos.
     if (octavosMatches && octavosMatches.length > 0) {
         initialPhaseMatches = octavosMatches;
-    } 
-    // 2. Si NO hay Octavos, pero SÍ hay partidos en Cuartos, Cuartos es la ronda inicial.
-    else if (cuartosMatches && cuartosMatches.length > 0) {
-        initialPhaseMatches = cuartosMatches;
-    } 
-    // 3. En cualquier otro caso, la inicial es vacía.
-    else {
+    } else if (cuartosMatches && cuartosMatches.length > 0) {
+        initialPhaseMatches = cuartosMatches; // Empezar el bracket aquí
+    } else {
         initialPhaseMatches = [];
     }
     // ------------------------------------
 
     // --- 1. PROCESAR EQUIPOS INICIALES (teams) ---
-    // Usamos la ronda inicial determinada arriba (Octavos O Cuartos)
     if (initialPhaseMatches.length > 0) {
         initialPhaseMatches.forEach(match => {
-            // ... (lógica existente de nombres)
             match.teamAName = match.player1A ? (match.player1A + (match.player2A ? `/${match.player2A}` : '')) : null;
             match.teamBName = match.player1B ? (match.player1B + (match.player2B ? `/${match.player2B}` : '')) : null;
 
             let teamAData = match.teamAName ? { name: match.teamAName } : null;
             let teamBData = match.teamBName ? { name: match.teamBName } : null;
 
-            // Usar 'TBD' (To Be Determined) si el equipo es nulo, para asegurar que el plugin funcione
+            // Usamos 'TBD' (To Be Determined) o nombres para equipos
             teams.push([teamAData || 'TBD', teamBData || 'TBD']); 
         });
     }
 
-    // --- 2. PROCESAR RESULTADOS Y MAPA DETALLADO (results & detailedResultsMap) ---
+    // --- 2. PROCESAR RESULTADOS Y MAPA DETALLADO ---
     
-    // 🔑 CLAVE: Determinar qué fases vamos a incluir en el array 'results'
     let phasesToProcess;
     
+    // 🔑 CLAVE DEL SALTO: Si Octavos está vacío, excluimos la fase 1 (Octavos)
     if (octavosMatches && octavosMatches.length > 0) {
-        // Incluir todas las fases si Octavos tiene partidos
         phasesToProcess = phasesDefinition; 
     } else {
-        // Excluir Octavos (id: 1) si está vacío.
         phasesToProcess = phasesDefinition.filter(p => p.id > 1);
     }
 
@@ -418,8 +410,7 @@ export const convertToBracketFormat = (matchData) => {
                 let setsA = 0;
                 let setsB = 0;
 
-                // ... (lógica existente de conteo de sets y tiebreak) ...
-
+                // Lógica de conteo de sets (se mantiene igual)
                 if ((parseInt(match.set1A) || 0) > (parseInt(match.set1B) || 0)) setsA++;
                 if ((parseInt(match.set1B) || 0) > (parseInt(match.set1A) || 0)) setsB++;
                 if ((parseInt(match.set2A) || 0) > (parseInt(match.set2B) || 0)) setsA++;
@@ -434,19 +425,23 @@ export const convertToBracketFormat = (matchData) => {
                     setsB++;
                 }
                 
-                // --- Mapeo Detallado (Se mantiene igual) ---
+                // --- Mapeo Detallado y Horarios ---
                 const teamAName = match.teamAName || (match.player1A ? (match.player1A + (match.player2A ? `/${match.player2A}` : '')) : `Match ${match.id} (A)`);
                 const teamBName = match.teamBName || (match.player1B ? (match.player1B + (match.player2B ? `/${match.player2B}` : '')) : `Match ${match.id} (B)`);
                 
-                // Mapear al Equipo A: resultId IMPAR
-                detailedResultsMap[`result-${resultIdCounter++}`] = {
-                    name: teamAName, phaseId: phaseId, set1A: match.set1A, set2A: match.set2A, tieA: match.tiebreakA, time: match.time
-                };
-
-                // Mapear al Equipo B: resultId PAR
-                detailedResultsMap[`result-${resultIdCounter++}`] = {
-                    name: teamBName, phaseId: phaseId, set1B: match.set1B, set2B: match.set2B, tieB: match.tiebreakB, time: match.time
-                };
+                // 1. resultId para el Equipo A (Slot Impar)
+                const resultIdA = `result-${resultIdCounter++}`; 
+                // 2. resultId para el Equipo B (Slot Par)
+                const resultIdB = `result-${resultIdCounter++}`; 
+                
+                // 🔑 CLAVE DE HORARIO: Si hay hora, la guardamos solo para el Slot A (resultIdA)
+                if (match.time) {
+                    scheduleByResultMap[resultIdA] = match.time; 
+                }
+                
+                // Llenar detailedResultsMap
+                detailedResultsMap[resultIdA] = { name: teamAName, phaseId: phaseId, set1A: match.set1A, set2A: match.set2A, tieA: match.tiebreakA, time: match.time };
+                detailedResultsMap[resultIdB] = { name: teamBName, phaseId: phaseId, set1B: match.set1B, set2B: match.set2B, tieB: match.tiebreakB, time: match.time };
                 
                 // Devolver el resultado numérico para 'results'
                 if (!match.set1A && !match.set1B && !match.set2A && !match.set2B && !match.scoreA && !match.scoreB) {
@@ -459,8 +454,9 @@ export const convertToBracketFormat = (matchData) => {
         }
     });
 
-    // Hacemos el mapa accesible globalmente
+    // Hacemos los mapas accesibles globalmente
     window.globalDetailedResultsMap = detailedResultsMap;
+    window.globalScheduleByResultMap = scheduleByResultMap; // ⬅️ MAPA CLAVE PARA LA HORA
 
     return { teams: teams, results: results };
 };
