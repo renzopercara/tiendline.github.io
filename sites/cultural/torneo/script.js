@@ -41,6 +41,7 @@ const JQueryBracketView = ({ initialData, bracketType }) => {
                     render: function (container, teamData, score, state) {
 
                         container.empty();
+                        window.currentResultIdCounter = `result-0`;
 
                         // Lógica de renderizado del nombre del equipo (se mantiene igual)
                         let name = '';
@@ -51,7 +52,7 @@ const JQueryBracketView = ({ initialData, bracketType }) => {
                         }
                         container.append(`<div class="team-name" style="max-width: 90%; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;">${name}</div>`);
 
-                        window.currentResultIdCounter = window.currentResultIdCounter || 1;
+                        
                         setTimeout(() => {
                             const detailedMap = window.globalDetailedResultsMap || {};
                             const teamElement = $(container).closest('.team');
@@ -62,13 +63,24 @@ const JQueryBracketView = ({ initialData, bracketType }) => {
 
                                 if (scoreElement.length) {
                                     let resultId = scoreElement.data('resultid');
+                                    let currentCounter = 0;
+                                    if (window.currentResultIdCounter && window.currentResultIdCounter.includes('-')) {
+                                        currentCounter = parseInt(window.currentResultIdCounter.split('-')[1]) || 0;
+                                    }
 
                                     if (!resultId) {
-                                        const id = parseInt(window.currentResultIdCounter.split('-')[1]) + 1
-                                        resultId = `result-${id}`;
+                                        const newId = currentCounter + 1;
+                                        resultId = `result-${newId}`;
                                         window.currentResultIdCounter = resultId;
                                     } else {
-                                        window.currentResultIdCounter = resultId;
+                                        const elementIdNum = parseInt(resultId.split('-')[1]);
+                                        if (elementIdNum <= currentCounter) {
+                                            const newId = currentCounter + 1;
+                                            resultId = `result-${newId}`;
+                                            window.currentResultIdCounter = resultId;
+                                        } else {
+                                            window.currentResultIdCounter = resultId;
+                                        }
                                     }
 
                                     const scoreData = detailedMap[resultId];
@@ -256,7 +268,7 @@ const TournamentDetails = ({ data, firebaseStandings }) => {
             // CAMBIO 3: Incluir data.id === 2 para SUMA 13 Hombres, usando las mismas vistas que SUMA 14
             content = subTab === 0
                 ? h(Sum14ClassificationView, { matchData: matchData })
-                : h(JQueryBracketView, { initialData: convertToBracketFormat(matchData), bracketType: data.id === 1 ? 'SUMA14' : 'SUMA13'});
+                : h(JQueryBracketView, { initialData: convertToBracketFormat(matchData), bracketType: data.id === 1 ? 'SUMA14' : 'SUMA13' });
         } else {
             content = subTab === 1
                 ? h(PlayerTable, { standings: firebaseStandings, showRank: true })
