@@ -313,29 +313,43 @@ const TournamentContent = ({ data, standings, db, userId }) => {
 };
 
 const hardReload = () => {
-    console.log('Detectada nueva versión: Forzando limpieza de caché y recarga.');
+    console.log('💥 Forzando recarga total y limpieza de caché...');
+
     try {
-        // 1. Limpia toda la CACHÉ DEL NAVEGADOR (incluyendo Service Workers)
+        // 1. Desregistrar y limpiar Service Workers (¡CRUCIAL en móviles!)
+        if ('serviceWorker' in navigator) {
+            navigator.serviceWorker.getRegistrations().then((registrations) => {
+                for (const registration of registrations) {
+                    // Desinstala el Service Worker
+                    registration.unregister(); 
+                }
+            });
+        }
+        
+        // 2. Limpiar la caché del navegador (archivos de red y módulos)
         if ('caches' in window) {
             caches.keys().then(names => {
                 names.forEach(name => {
-                    caches.delete(name);
+                    caches.delete(name); // Borra caché del Service Worker y fetch
                 });
             });
         }
         
-        // 2. Limpia el ALMACENAMIENTO LOCAL (donde está el VERSION_KEY antiguo)
+        // 3. Limpiar todo el almacenamiento local (incluyendo VERSION_KEY)
         localStorage.clear();
+        sessionStorage.clear(); // Limpiamos también la caché de sesión
         
-        // 3. Establece la NUEVA versión antes de recargar
-        // (Asegúrate de que CURRENT_APP_VERSION sea "1.0.5")
+        // 4. Establecer la nueva versión ANTES de la recarga
+        // Esto asegura que al recargar no entre en un bucle infinito
         localStorage.setItem(VERSION_KEY, CURRENT_APP_VERSION);
         
-        // 4. Forzar la recarga desde el servidor (no desde caché)
+        // 5. Forzar la recarga de la página, saltándose la caché del navegador (reload(true) es la clave)
+        // Este proceso ocurre después de que el navegador intenta limpiar todo.
         window.location.reload(true); 
 
     } catch (e) {
-        console.error("Error al forzar la recarga:", e);
+        console.error("Error al forzar la recarga, intentando fallback:", e);
+        // Fallback simple si la limpieza falla
         window.location.reload(); 
     }
 };
