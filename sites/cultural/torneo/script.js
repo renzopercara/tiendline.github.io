@@ -9,6 +9,9 @@ import { Sum14ClassificationView } from "./suma14.js";
 import { MatchesView, PlayerTable, LoadingSpinner, convertToBracketFormat } from "./common.js";
 import { SponsorsSlider } from "./SponsorSlider.js";
 import { Facebook, Instagram, Linkedin } from "lucide-preact";
+import { MenuCantina } from "./MenuCantina.js";
+
+
 
 const JQueryBracketView = ({ initialData, bracketType }) => {
     const bracketRef = useRef(null);
@@ -52,7 +55,7 @@ const JQueryBracketView = ({ initialData, bracketType }) => {
                         }
                         container.append(`<div class="team-name" style="max-width: 90%; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;">${name}</div>`);
 
-                        
+
                         setTimeout(() => {
                             const detailedMap = window.globalDetailedResultsMap || {};
                             const teamElement = $(container).closest('.team');
@@ -285,15 +288,21 @@ const TournamentDetails = ({ data, firebaseStandings }) => {
     );
 };
 
-const TournamentContent = ({ data, standings, db, userId }) => (
-    h('div', { className: 'p-4 sm:p-6 bg-white rounded-lg shadow-inner mt-[70px]' },
+const TournamentContent = ({ data, standings, db, userId }) => {
+    if (data.id === 'Menu') {
+        return h(MenuCantina); 
+    }
+
+    // --- Renderizado Normal de Torneo ---
+    
+    return h('div', { className: 'p-4 sm:p-6 bg-white rounded-lg shadow-inner mt-[70px]' },
         h('div', { className: 'flex items-center justify-center mb-4' },
             h('div', { className: 'text-5xl mr-3' }, data.icon),
             h('h3', { className: 'text-2 font-extrabold text-gray-800' }, data.fullTitle)
         ),
         h('p', { className: 'text-gray-600 mb-6 text-center border-b pb-4' }, data.description),
 
-        // CAMBIO 4: Incluir data.id === 2 aquí también para que se renderice TournamentDetails
+        // Lógica original para mostrar detalles de torneos
         (data.id === 0 || data.id === 1 || data.id === 2)
             ? h(TournamentDetails, { data: data, firebaseStandings: standings })
             : h('div', { className: 'space-y-4' },
@@ -301,7 +310,7 @@ const TournamentContent = ({ data, standings, db, userId }) => (
                 h('div', { className: 'p-4 text-center text-gray-500 text-sm' }, 'Para este torneo solo está disponible la tabla de posiciones general (vía Firebase).')
             )
     )
-);
+};
 
 
 function App() {
@@ -393,30 +402,34 @@ function App() {
         return () => unsubscribe();
     }, [db, userId, activeTab]);
 
-    const TabButton = ({ index, name }) => {
+
+    const TabButton = ({ index, tabData }) => {
         const isActive = index === activeTab;
-        const baseClasses = 'flex-1 py-3 text-sm font-semibold transition-colors duration-200 border-b-4 focus:outline-none';
+        
+        // Clases ajustadas para compacidad y altura
+        const baseClasses = 'flex-1 py-2 text-xs font-semibold transition-colors duration-200 border-b-4 focus:outline-none';
+
         const activeClasses = 'text-blue-600 border-blue-600 bg-blue-50/50';
         const inactiveClasses = 'text-gray-600 border-transparent hover:text-blue-500 hover:border-gray-300';
-
-        // Para permitir el salto de línea en el nombre:
-        const renderName = () => {
-            if (Array.isArray(name) && name.length > 1) {
-                return name.map((line, i) => [
-                    line,
-                    i < name.length - 1 ? h('br') : null
-                ]);
-            }
-            return name;
+        
+        // 🔑 CAMBIO CLAVE: El click solo cambia el activeTab.
+        const handleClick = () => {
+            setActiveTab(index);
         };
 
-
         return h('button', {
-            className: `${baseClasses} ${isActive ? activeClasses : inactiveClasses} leading-tight`, // CLAVE: Añadir leading-tight aquí
-            onClick: () => setActiveTab(index),
+            className: `${baseClasses} ${isActive ? activeClasses : inactiveClasses} leading-tight`,
+            onClick: handleClick,
             role: 'tab',
             'aria-selected': isActive,
-        }, h('span', null, renderName()));
+        },
+            h('div', {
+                className: 'flex flex-col items-center justify-center h-full'
+            },
+                h('span', { className: 'text-xs font-bold whitespace-nowrap' }, tabData.name),
+                h('span', { className: 'text-sm' }, tabData.icon)
+            )
+        );
     };
 
     const socialLinks = [
@@ -517,7 +530,11 @@ function App() {
                 className: 'flex justify-between bg-white border-b border-gray-200 shadow-md',
                 role: 'tablist'
             },
-                tournamentData.map((tab, index) => h(TabButton, { key: tab.id, index: index, name: tab.name }))
+                tournamentData.map((tab, index) => h(TabButton, {
+                    key: tab.id,
+                    index: index,
+                    tabData: tab
+                }))
             ),
         ),
         // -----------------------------------------------------------
