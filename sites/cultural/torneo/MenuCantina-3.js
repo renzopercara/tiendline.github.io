@@ -1,7 +1,7 @@
 import { useState, useEffect} from "preact/hooks";
-import { MENU_URL } from "./contants.js";
+import { MENU_URL } from "./contants-3.js";
 import { h } from "preact";
-import { LoadingSpinner } from "./common.js";
+import { LoadingSpinner } from "./common-3.js";
 import { Coffee, Utensils, Zap } from "lucide-preact";
 
 const getIconForCategory = (category) => {
