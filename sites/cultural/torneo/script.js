@@ -3,7 +3,7 @@ import { useState, useEffect, useRef } from "preact/hooks";
 import { initializeApp } from "firebase/app";
 import { getAuth, signInAnonymously, signInWithCustomToken, onAuthStateChanged } from "firebase/auth";
 import { getFirestore, collection, query, onSnapshot } from "firebase/firestore";
-import { AMERICANO_MUJERES_URL, SUMA_14_MUJERES_URL, tournamentData, SUMA_13_HOMBRES_URL } from "./contants.js";
+import { AMERICANO_MUJERES_URL, SUMA_14_MUJERES_URL, tournamentData, SUMA_13_HOMBRES_URL, CURRENT_APP_VERSION, VERSION_KEY  } from "./contants.js";
 import { calculateStandings } from "./americano.js";
 import { Sum14ClassificationView } from "./suma14.js";
 import { MatchesView, PlayerTable, LoadingSpinner, convertToBracketFormat } from "./common.js";
@@ -312,8 +312,47 @@ const TournamentContent = ({ data, standings, db, userId }) => {
     )
 };
 
+const hardReload = () => {
+    console.log('Detectada nueva versión: Forzando limpieza de caché y recarga.');
+    try {
+        if ('caches' in window) {
+            caches.keys().then(names => {
+                names.forEach(name => {
+                    caches.delete(name);
+                });
+            });
+        }
+        
+        // 2. Limpiar todo el almacenamiento local
+        localStorage.clear();
+        
+        // 3. Establecer la nueva versión ANTES de recargar
+        localStorage.setItem(VERSION_KEY, CURRENT_APP_VERSION);
+        
+        // 4. Forzar la recarga de la página
+        window.location.reload(true); 
+
+    } catch (e) {
+        console.error("Error al forzar la recarga:", e);
+        window.location.reload(); 
+    }
+};
+
+function useVersionCheck() {
+    useEffect(() => {
+        const storedVersion = localStorage.getItem(VERSION_KEY);
+        if (storedVersion !== CURRENT_APP_VERSION) {
+            console.log(`Versión local: ${storedVersion}. Versión actual: ${CURRENT_APP_VERSION}`);
+            hardReload();
+        } else {
+            console.log(`Versión local (${storedVersion}) coincide con la versión actual.`)
+        }
+    }, []);
+}
 
 function App() {
+    useVersionCheck();
+
     const params = new URLSearchParams(window.location.search);
     const initialTab = parseInt(params.get("tab")) || 0;
 
