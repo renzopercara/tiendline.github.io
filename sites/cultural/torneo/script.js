@@ -3,7 +3,7 @@ import { useState, useEffect, useRef } from "preact/hooks";
 import { initializeApp } from "firebase/app";
 import { getAuth, signInAnonymously, signInWithCustomToken, onAuthStateChanged } from "firebase/auth";
 import { getFirestore, collection, query, onSnapshot } from "firebase/firestore";
-import { AMERICANO_MUJERES_URL, SUMA_14_MUJERES_URL, tournamentData, SUMA_13_HOMBRES_URL, CURRENT_APP_VERSION, VERSION_KEY  } from "./contants.js?v=1";
+import { AMERICANO_MUJERES_URL, SUMA_14_MUJERES_URL, tournamentData, SUMA_13_HOMBRES_URL, CURRENT_APP_VERSION, VERSION_KEY  } from "./contants.js";
 import { calculateStandings } from "./americano.js";
 import { Sum14ClassificationView } from "./suma14.js";
 import { MatchesView, PlayerTable, LoadingSpinner, convertToBracketFormat } from "./common.js";
