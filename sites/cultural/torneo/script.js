@@ -315,6 +315,10 @@ const TournamentContent = ({ data, standings, db, userId }) => {
 const hardReload = () => {
     console.log('Detectada nueva versión: Forzando limpieza de caché y recarga.');
     try {
+        // 1. Limpiar todo el almacenamiento local (¡CRUCIAL para el estado de la app!)
+        localStorage.clear();
+
+        // 2. Limpiar caché del navegador (incluyendo Service Workers)
         if ('caches' in window) {
             caches.keys().then(names => {
                 names.forEach(name => {
@@ -323,17 +327,18 @@ const hardReload = () => {
             });
         }
         
-        // 2. Limpiar todo el almacenamiento local
-        localStorage.clear();
-        
-        // 3. Establecer la nueva versión ANTES de recargar
+        // 3. Establecer la nueva versión (para que la próxima carga sea normal)
+        // **IMPORTANTE: Debemos hacer esto ANTES de la recarga, o la página cargará la versión vieja
+        // y volverá a entrar en un bucle de recarga infinita si falla la limpieza.**
         localStorage.setItem(VERSION_KEY, CURRENT_APP_VERSION);
         
-        // 4. Forzar la recarga de la página
+        // 4. Forzar la recarga de la página, saltándose la caché del navegador.
+        // El 'true' en reload(true) fuerza una recarga del servidor.
         window.location.reload(true); 
 
     } catch (e) {
         console.error("Error al forzar la recarga:", e);
+        // Fallback simple si la limpieza falla
         window.location.reload(); 
     }
 };

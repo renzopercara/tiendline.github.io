@@ -3,7 +3,7 @@ export const SUMA_14_MUJERES_URL = 'https://script.google.com/macros/s/AKfycbx9a
 export const SUMA_13_HOMBRES_URL = 'https://script.google.com/macros/s/AKfycbx9aup0mOPJWCZQoqAfQPxStWiiVkyE5Y3ql7sSZTx3bUsLbAaVylx8NdaMcihiVCN_/exec?action=torneo13';
 export const MENU_URL = 'https://script.google.com/macros/s/AKfycbwLH4m4VQxFZ-eiQNsht15YX_tgDvQDIS6w-4OOWBrVtAOHVzDfUC51Tse35cw9mUdC/exec';
 
-export const CURRENT_APP_VERSION = '1.0.2'; 
+export const CURRENT_APP_VERSION = '1.0.3'; 
 export const VERSION_KEY = 'menu_app_version';
 
 export const tournamentData = [
