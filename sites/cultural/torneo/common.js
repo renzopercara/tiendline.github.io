@@ -1,7 +1,7 @@
 import { ChevronDown, ChevronUp } from "lucide-preact";
 import { h } from "preact";
 import { useState, useEffect, useRef } from "preact/hooks";
-import { FINAL_PHASE_GROUPS } from "./contants-2.js";
+import { FINAL_PHASE_GROUPS } from "./contants.js";
 
 export const GroupDropdown = ({ groups, selectedGroup, onGroupChange }) => {
     const [isOpen, setIsOpen] = useState(false);

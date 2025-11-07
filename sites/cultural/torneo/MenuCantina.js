@@ -1,5 +1,5 @@
 import { useState, useEffect} from "preact/hooks";
-import { MENU_URL } from "./contants-2.js";
+import { MENU_URL } from "./contants.js";
 import { h } from "preact";
 import { LoadingSpinner } from "./common.js";
 import { Coffee, Utensils, Zap } from "lucide-preact";

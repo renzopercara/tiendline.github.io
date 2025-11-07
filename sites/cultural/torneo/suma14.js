@@ -1,7 +1,7 @@
 import { h, render } from "preact";
 import { useState, useEffect, useRef } from "preact/hooks";
 import { GroupDropdown, MatchesView } from "./common.js";
-import { FINAL_PHASE_GROUPS } from "./contants-2.js";
+import { FINAL_PHASE_GROUPS } from "./contants.js";
 
 export const calculateSum14Standings = (matchData, groupName) => {
     const standingsMap = new Map();
