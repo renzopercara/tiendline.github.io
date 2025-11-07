@@ -316,40 +316,44 @@ const hardReload = () => {
     console.log('💥 Forzando recarga total y limpieza de caché...');
 
     try {
-        // 1. Desregistrar y limpiar Service Workers (¡CRUCIAL en móviles!)
+        // 1. Desregistrar Service Workers (¡El paso MÁS CRÍTICO en móviles!)
+        // Esto obliga al Service Worker a liberar el control de la página.
         if ('serviceWorker' in navigator) {
             navigator.serviceWorker.getRegistrations().then((registrations) => {
                 for (const registration of registrations) {
-                    // Desinstala el Service Worker
                     registration.unregister(); 
                 }
+                console.log('Service Workers desregistrados.');
             });
         }
         
-        // 2. Limpiar la caché del navegador (archivos de red y módulos)
+        // 2. Limpiar la caché del navegador (incluyendo la caché de módulos fetch/ESM)
         if ('caches' in window) {
             caches.keys().then(names => {
                 names.forEach(name => {
-                    caches.delete(name); // Borra caché del Service Worker y fetch
+                    caches.delete(name); 
                 });
+                console.log('Caché del navegador borrada.');
             });
         }
         
-        // 3. Limpiar todo el almacenamiento local (incluyendo VERSION_KEY)
+        // 3. Limpiar todo el almacenamiento local y de sesión
         localStorage.clear();
-        sessionStorage.clear(); // Limpiamos también la caché de sesión
+        sessionStorage.clear(); 
+        console.log('Almacenamiento local/sesión borrado.');
         
-        // 4. Establecer la nueva versión ANTES de la recarga
-        // Esto asegura que al recargar no entre en un bucle infinito
+        // 4. Establecer la nueva versión (para evitar un bucle de recarga)
         localStorage.setItem(VERSION_KEY, CURRENT_APP_VERSION);
         
-        // 5. Forzar la recarga de la página, saltándose la caché del navegador (reload(true) es la clave)
-        // Este proceso ocurre después de que el navegador intenta limpiar todo.
-        window.location.reload(true); 
+        // 5. Forzar la recarga desde el servidor (reload(true) ignora la caché HTTP)
+        // Usamos un pequeño retraso para dar tiempo a que las promesas de limpieza se inicialicen.
+        setTimeout(() => {
+            window.location.reload(true); 
+        }, 300); 
 
     } catch (e) {
         console.error("Error al forzar la recarga, intentando fallback:", e);
-        // Fallback simple si la limpieza falla
+        // Si todo falla, al menos recargamos.
         window.location.reload(); 
     }
 };
