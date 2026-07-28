@@ -1,0 +1,657 @@
+import { h, render } from "preact";
+import { useState, useEffect, useRef } from "preact/hooks";
+import { initializeApp } from "firebase/app";
+import { getAuth, signInAnonymously, signInWithCustomToken, onAuthStateChanged } from "firebase/auth";
+import { getFirestore, collection, query, onSnapshot } from "firebase/firestore";
+import { SUMA_15_MUJERES_URL, tournamentData, SUMA_13_HOMBRES_URL, CURRENT_APP_VERSION, VERSION_KEY } from "./contants-3.js";
+
+import { Sum14ClassificationView } from "./suma14-3.js";
+import { PlayerTable, LoadingSpinner, convertToBracketFormat } from "./common-3.js";
+import { SponsorsSlider } from "./SponsorSlider-3.js";
+import { MenuCantina } from "./MenuCantina-3.js";
+
+const Facebook = ({ className }) =>
+    h("svg", {
+        xmlns: "http://www.w3.org/2000/svg",
+        viewBox: "0 0 24 24",
+        fill: "currentColor",
+        className
+    }, h("path", {
+        d: "M24 12.07C24 5.404 18.627 0 12 0S0 5.404 0 12.07c0 6.019 4.388 11.009 10.125 11.93v-8.437H7.078v-3.493h3.047V9.41c0-3.017 1.792-4.686 4.533-4.686 1.312 0 2.686.235 2.686.235v2.963h-1.514c-1.491 0-1.956.928-1.956 1.88v2.268h3.328l-.532 3.493h-2.796V24C19.612 23.079 24 18.089 24 12.07z"
+    }));
+
+const Instagram = ({ className }) =>
+    h("svg", {
+        xmlns: "http://www.w3.org/2000/svg",
+        viewBox: "0 0 24 24",
+        fill: "currentColor",
+        className
+    }, h("path", {
+        d: "M7 2C4.243 2 2 4.243 2 7v10c0 2.757 2.243 5 5 5h10c2.757 0 5-2.243 5-5V7c0-2.757-2.243-5-5-5H7zm10 2c1.654 0 3 1.346 3 3v10c0 1.654-1.346 3-3 3H7c-1.654 0-3-1.346-3-3V7c0-1.654 1.346-3 3-3h10zm-5 3.5A5.5 5.5 0 1 0 17.5 13 5.506 5.506 0 0 0 12 7.5zm0 2A3.5 3.5 0 1 1 8.5 13 3.504 3.504 0 0 1 12 9.5zm5.75-3.25a1.25 1.25 0 1 0 1.25 1.25 1.252 1.252 0 0 0-1.25-1.25z"
+    }));
+
+const Linkedin = ({ className }) =>
+    h("svg", {
+        xmlns: "http://www.w3.org/2000/svg",
+        viewBox: "0 0 24 24",
+        fill: "currentColor",
+        className
+    }, h("path", {
+        d: "M20.447 20.452H16.89v-5.569c0-1.328-.024-3.037-1.852-3.037-1.853 0-2.136 1.445-2.136 2.939v5.667H9.345V9h3.414v1.561h.049c.476-.9 1.637-1.85 3.369-1.85 3.601 0 4.267 2.37 4.267 5.455v6.286zM5.337 7.433a2.063 2.063 0 1 1 0-4.126 2.063 2.063 0 0 1 0 4.126zM7.119 20.452H3.556V9h3.563v11.452z"
+    }));
+
+const JQueryBracketView = ({ initialData, bracketType }) => {
+    const bracketRef = useRef(null);
+    const [isBracketLoaded, setIsBracketLoaded] = useState(false);
+    const dataKey = JSON.stringify(initialData);
+
+    useEffect(() => {
+        const $ = window.jQuery;
+        if ($ && initialData.teams && initialData.teams.length > 0 && bracketRef.current) {
+            if (!$.fn.bracket) {
+                console.error("jQuery Bracket plugin NO SE ENCUENTRA. Verifique la carga.");
+                setIsBracketLoaded(false);
+                return;
+            }
+
+            $(bracketRef.current).empty();
+
+            const containerElement = $(bracketRef.current);
+
+            containerElement.addClass('bracket-contenedor').attr('id', `bracket-${bracketType}`);
+
+            // Uso Mínimo como en el ejemplo:
+            $(bracketRef.current).bracket({
+                init: initialData,
+                teamWidth: 200,
+                scoreWidth: 30,
+                matchMargin: 40,
+                roundMargin: 50,
+                decorator: {
+                    render: function (container, teamData, score, state) {
+
+                        container.empty();
+                        window.currentResultIdCounter = `result-0`;
+
+                        // Lógica de renderizado del nombre del equipo (se mantiene igual)
+                        let name = '';
+                        if (typeof teamData === 'object' && teamData !== null) {
+                            name = teamData.name || '';
+                        } else if (typeof teamData === 'string') {
+                            name = teamData || '';
+                        }
+                        container.append(`<div class="team-name" style="max-width: 90%; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;">${name}</div>`);
+
+
+                        setTimeout(() => {
+                            const detailedMap = window.globalDetailedResultsMap || {};
+                            const teamElement = $(container).closest('.team');
+
+                            if (teamElement.length) {
+                                // Obtener scoreElement (que tiene resultId)
+                                const scoreElement = teamElement.find('.score');
+
+                                if (scoreElement.length) {
+                                    let resultId = scoreElement.data('resultid');
+                                    let currentCounter = 0;
+                                    if (window.currentResultIdCounter && window.currentResultIdCounter.includes('-')) {
+                                        currentCounter = parseInt(window.currentResultIdCounter.split('-')[1]) || 0;
+                                    }
+
+                                    if (!resultId) {
+                                        const newId = currentCounter + 1;
+                                        resultId = `result-${newId}`;
+                                        window.currentResultIdCounter = resultId;
+                                    } else {
+                                        const elementIdNum = parseInt(resultId.split('-')[1]);
+                                        if (elementIdNum <= currentCounter) {
+                                            const newId = currentCounter + 1;
+                                            resultId = `result-${newId}`;
+                                            window.currentResultIdCounter = resultId;
+                                        } else {
+                                            window.currentResultIdCounter = resultId;
+                                        }
+                                    }
+
+                                    const scoreData = detailedMap[resultId];
+
+                                    // 1. 🔑 DEFINICIÓN CLAVE: Determinar si es el Slot A (impar)
+                                    const idNumber = parseInt(resultId.split('-')[1]);
+                                    const isTeamASlot = idNumber % 2 !== 0;
+
+                                    // --- LÓGICA DE HORA (SIEMPRE VISIBLE) ---
+                                    // Se ejecuta si hay datos y si es el slot A (impar), para dibujar solo una vez por partido.
+                                    if (scoreData && scoreData.time && isTeamASlot) {
+                                        const time = scoreData.time;
+
+                                        // Buscamos el contenedor del partido completo (.match)
+                                        const matchContainer = teamElement.closest('.match');
+
+                                        // Agregamos el badge de la hora si aún no existe en el contenedor del partido
+                                        if (matchContainer.length && !matchContainer.find('.team-time-badge').length) {
+                                            matchContainer.append(`<div class="team-time-badge" style="position:absolute;top:48%;right:16%;transform:translate(0, -50%);background:#2563EB;color:white;padding:2px 6px;border-radius:8px;font-size:12px;z-index:1000;pointer-events:none;">${time}</div>`);
+                                        }
+                                    }
+                                    // ------------------------------------------
+
+                                    if (scoreData) {
+                                        // --- LÓGICA DE RESULTADOS Y SETS (Solo si hay scoreData) ---
+
+                                        let currentSet1, currentSet2, currentTie;
+
+                                        if (isTeamASlot) {
+                                            currentSet1 = scoreData.set1A;
+                                            currentSet2 = scoreData.set2A;
+                                            currentTie = scoreData.tieA;
+                                        } else {
+                                            currentSet1 = scoreData.set1B;
+                                            currentSet2 = scoreData.set2B;
+                                            currentTie = scoreData.tieB;
+                                        }
+
+                                        // Renderizar los sets
+                                        const $scoresContainer = $(container).find('.detailed-scores');
+
+                                        // Usamos el DOM ya creado en la fase de render inicial
+                                        $scoresContainer.find('.score-set1').text(currentSet1 || '');
+                                        $scoresContainer.find('.score-set2').text(currentSet2 || '');
+
+                                        // Lógica opcional para Tiebreak (si tienes elementos para esto)
+                                        // if (currentTie && currentTie !== 0) { ... }
+                                    }
+                                }
+                            }
+                        }, 0);
+                    },
+
+                    edit: function (container, teamData, doneCb) {
+                        // Lógica de edición (se mantiene igual)
+                        let name = (typeof teamData === 'object' && teamData !== null) ? teamData.name || '' : teamData || '';
+
+                        const input = $('<input type="text">');
+                        input.val(name);
+                        container.empty().append(input);
+                        input.focus();
+
+                        input.blur(() => {
+                            doneCb(input.val());
+                        });
+                    }
+                }
+            });
+
+
+            setIsBracketLoaded(true);
+        } else {
+            setIsBracketLoaded(false);
+        }
+
+    }, [dataKey]);
+
+    return h('div', {
+        className: 'bracket-container-wrapper p-4 overflow-x-auto bg-white shadow-inner rounded-lg min-h-[400px]',
+        key: dataKey,
+        ref: bracketRef,
+    },
+        // Lógica de mensajes de carga/datos
+        !isBracketLoaded && initialData.teams && initialData.teams.length > 0
+            ? h('div', { className: 'p-4 text-center text-gray-500' }, 'Cargando llave del torneo...')
+            : initialData.teams && initialData.teams.length === 0
+                ? h('div', { className: 'p-4 text-center text-gray-500 font-semibold' }, 'La fase final aún no tiene partidos definidos o cargados.')
+                : null
+    );
+};
+
+const TournamentDetails = ({ data, firebaseStandings }) => {
+    // CAMBIO 1: isNormalTournament debe incluir el nuevo ID para SUMA 13 Hombres (asumido como 2)
+    const isNormalTournament = data.id === 1 || data.id === 2;
+    const initialSubTab = isNormalTournament ? 0 : 0;
+    const [subTab, setSubTab] = useState(initialSubTab);
+    const [matchData, setMatchData] = useState([]);
+    const [loading, setLoading] = useState(true);
+    const [error, setError] = useState(null);
+
+
+    const fetchWithBackoff = async (url, retries = 3, delay = 1000) => {
+        for (let i = 0; i < retries; i++) {
+            try {
+                const response = await fetch(url);
+                if (!response.ok) {
+                    throw new Error(`HTTP error! status: ${response.status}`);
+                }
+                return await response.json();
+            } catch (error) {
+                if (i < retries - 1) {
+                    await new Promise(resolve => setTimeout(resolve, delay * (2 ** i)));
+                } else {
+                    throw error;
+                }
+            }
+        }
+    };
+
+
+    useEffect(() => {
+        const fetchMatches = async (url, tournamentId) => {
+            setLoading(true);
+            setError(null);
+            try {
+                const data = await fetchWithBackoff(url);
+                setMatchData(data);
+
+            } catch (e) {
+                console.error("Fetch error:", e);
+                setError('Error al cargar los datos. Intente recargar.');
+            } finally {
+                setLoading(false);
+            }
+        };
+
+        if (data.id === 1) {
+            fetchMatches(SUMA_15_MUJERES_URL, 1);
+        } else if (data.id === 2) {
+            fetchMatches(SUMA_13_HOMBRES_URL, 2);
+        } else {
+            setMatchData([]);
+            setLoading(false);
+        }
+    }, [data.id]);
+
+    const subTabs = [
+        { id: 0, name: 'Clasificación' },
+        { id: 1, name: 'Fase Final' }
+    ];
+
+    const SubTabButton = ({ index, name }) => {
+        const isActive = index === subTab;
+        const baseClasses = 'flex-1 py-3 text-sm font-semibold transition-colors duration-200 border-b-2 focus:outline-none';
+        const activeClasses = 'text-indigo-600 border-indigo-600';
+        const inactiveClasses = 'text-gray-500 border-transparent hover:text-indigo-500';
+
+        return h('button', {
+            className: `${baseClasses} ${isActive ? activeClasses : inactiveClasses}`,
+            onClick: () => setSubTab(index),
+            role: 'tab',
+            'aria-selected': isActive,
+        }, name);
+    };
+
+    let content;
+    if (loading) {
+        content = h(LoadingSpinner);
+    } else if (error) {
+        content = h('div', { className: 'p-6 text-center text-red-500 font-semibold border-2 border-red-300 rounded-lg' }, error);
+    } else {
+        if (data.id === 1 || data.id === 2) {
+            // CAMBIO 3: Incluir data.id === 2 para SUMA 13 Hombres, usando las mismas vistas que SUMA 14
+            content = subTab === 0
+                ? h(Sum14ClassificationView, { matchData: matchData })
+                : h(JQueryBracketView, { initialData: convertToBracketFormat(matchData), bracketType: data.id === 1 ? 'SUMA14' : 'SUMA13' });
+        } else {
+            content = subTab === 1
+                ? h(PlayerTable, { standings: firebaseStandings, showRank: true })
+                : h('div', { className: 'p-4 text-center text-gray-500' }, 'Partidos y llaves no disponibles.');
+        }
+    }
+
+
+    return h('div', null,
+        h('nav', { className: 'flex justify-between bg-gray-50 border-b border-gray-200 shadow-inner rounded-t-lg mb-4' },
+            subTabs.map((tab, index) => h(SubTabButton, { key: tab.id, index: index, name: tab.name }))
+        ),
+        content
+    );
+};
+
+const TournamentContent = ({ data, standings, db, userId }) => {
+    if (data.id === 'Menu') {
+        return h(MenuCantina);
+    }
+
+    // --- Renderizado Normal de Torneo ---
+
+    return h('div', { className: 'p-4 sm:p-6 bg-white rounded-lg shadow-inner mt-[70px]' },
+        h('div', { className: 'flex items-center justify-center mb-4' },
+            h('div', { className: 'text-5xl mr-3' }, data.icon),
+            h('h3', { className: 'text-2 font-extrabold text-gray-800' }, data.fullTitle)
+        ),
+        h('p', { className: 'text-gray-600 mb-6 text-center border-b pb-4' }, data.description),
+
+        // Lógica original para mostrar detalles de torneos
+        (data.id === 1 || data.id === 2)
+            ? h(TournamentDetails, { data: data, firebaseStandings: standings })
+            : h('div', { className: 'space-y-4' },
+                h(PlayerTable, { standings: standings, showRank: true }),
+                h('div', { className: 'p-4 text-center text-gray-500 text-sm' }, 'Para este torneo solo está disponible la tabla de posiciones general (vía Firebase).')
+            )
+    )
+};
+
+const hardReload = () => {
+    console.log('💥 Forzando recarga total y limpieza de caché...');
+
+    try {
+        // 1. Desregistrar Service Workers (¡El paso MÁS CRÍTICO en móviles!)
+        // Esto obliga al Service Worker a liberar el control de la página.
+        if ('serviceWorker' in navigator) {
+            navigator.serviceWorker.getRegistrations().then((registrations) => {
+                for (const registration of registrations) {
+                    registration.unregister();
+                }
+                console.log('Service Workers desregistrados.');
+            });
+        }
+
+        // 2. Limpiar la caché del navegador (incluyendo la caché de módulos fetch/ESM)
+        if ('caches' in window) {
+            caches.keys().then(names => {
+                names.forEach(name => {
+                    caches.delete(name);
+                });
+                console.log('Caché del navegador borrada.');
+            });
+        }
+
+        // 3. Limpiar todo el almacenamiento local y de sesión
+        localStorage.clear();
+        sessionStorage.clear();
+        console.log('Almacenamiento local/sesión borrado.');
+
+        // 4. Establecer la nueva versión (para evitar un bucle de recarga)
+        localStorage.setItem(VERSION_KEY, CURRENT_APP_VERSION);
+
+        // 5. Forzar la recarga desde el servidor (reload(true) ignora la caché HTTP)
+        // Usamos un pequeño retraso para dar tiempo a que las promesas de limpieza se inicialicen.
+        setTimeout(() => {
+            window.location.reload(true);
+        }, 300);
+
+    } catch (e) {
+        console.error("Error al forzar la recarga, intentando fallback:", e);
+        // Si todo falla, al menos recargamos.
+        window.location.reload();
+    }
+};
+
+function useVersionCheck() {
+    useEffect(() => {
+        const storedVersion = localStorage.getItem(VERSION_KEY);
+        if (storedVersion !== CURRENT_APP_VERSION) {
+            console.log(`Versión local: ${storedVersion}. Versión actual: ${CURRENT_APP_VERSION}`);
+            hardReload();
+        } else {
+            console.log(`Versión local (${storedVersion}) coincide con la versión actual.`)
+        }
+    }, []);
+}
+
+function App() {
+    useVersionCheck();
+
+    const params = new URLSearchParams(window.location.search);
+    const initialTab = parseInt(params.get("tab")) || 0;
+
+    const [activeTab, setActiveTab] = useState(initialTab);
+    const [userId, setUserId] = useState(null);
+    const [db, setDb] = useState(null);
+    const [standings, setStandings] = useState([]);
+
+
+    useEffect(() => {
+        const params = new URLSearchParams(window.location.search);
+        const tabParam = parseInt(params.get("tab"));
+        if (!isNaN(tabParam) && tabParam >= 0 && tabParam < tournamentData.length) {
+            setActiveTab(tabParam);
+        }
+    }, []);
+
+    useEffect(() => {
+        const params = new URLSearchParams(window.location.search);
+        params.set("tab", activeTab);
+        const newUrl = `${window.location.pathname}?${params.toString()}`;
+        window.history.replaceState(null, "", newUrl);
+    }, [activeTab]);
+
+    const activeTournament = tournamentData[activeTab];
+
+    useEffect(() => {
+        const firebaseConfig = typeof __firebase_config !== 'undefined' ? JSON.parse(__firebase_config) : {};
+        const initialAuthToken = typeof __initial_auth_token !== 'undefined' ? __initial_auth_token : null;
+
+        if (Object.keys(firebaseConfig).length === 0) {
+            console.error("Firebase config is missing.");
+            return;
+        }
+
+        const app = initializeApp(firebaseConfig);
+        const auth = getAuth(app);
+        const firestore = getFirestore(app);
+
+        setDb(firestore);
+
+        const authPromise = initialAuthToken
+            ? signInWithCustomToken(auth, initialAuthToken).catch(error => {
+                console.error("Custom sign-in failed. Falling back to anonymous.", error);
+                return signInAnonymously(auth);
+            })
+            : signInAnonymously(auth);
+
+        authPromise.then(() => {
+            onAuthStateChanged(auth, (user) => {
+                if (user) {
+                    setUserId(user.uid);
+                } else {
+                    setUserId(crypto.randomUUID());
+                }
+            });
+        });
+
+    }, []);
+
+    useEffect(() => {
+        // CAMBIO 5: Incluir data.id === 2 para evitar cargar standings de Firebase para SUMA 13
+        if (!db || !userId || activeTournament.id === 1 || activeTournament.id === 2) {
+            setStandings([]);
+            return;
+        }
+
+        const appId = typeof __app_id !== 'undefined' ? __app_id : 'default-app-id';
+        const collectionPath = `/artifacts/${appId}/users/${userId}/tournament_standings_${activeTournament.id}`;
+
+        const q = query(collection(db, collectionPath));
+
+        const unsubscribe = onSnapshot(q, (snapshot) => {
+            const list = [];
+            snapshot.forEach((doc) => {
+                list.push({ id: doc.id, ...doc.data() });
+            });
+
+            const sortedList = list.sort((a, b) => b.score - a.score);
+            setStandings(sortedList);
+        }, (error) => {
+            console.error("Error fetching standings:", error);
+            setStandings([]);
+        });
+
+        return () => unsubscribe();
+    }, [db, userId, activeTab]);
+
+
+    const TabButton = ({ index, tabData }) => {
+        const isActive = index === activeTab;
+
+        // Clases ajustadas para compacidad y altura
+        const baseClasses = 'flex-1 py-2 text-xs font-semibold transition-colors duration-200 border-b-4 focus:outline-none';
+
+        const activeClasses = 'text-blue-600 border-blue-600 bg-blue-50/50';
+        const inactiveClasses = 'text-gray-600 border-transparent hover:text-blue-500 hover:border-gray-300';
+
+        // 🔑 CAMBIO CLAVE: El click solo cambia el activeTab.
+        const handleClick = () => {
+            setActiveTab(index);
+        };
+
+        return h('button', {
+            className: `${baseClasses} ${isActive ? activeClasses : inactiveClasses} leading-tight`,
+            onClick: handleClick,
+            role: 'tab',
+            'aria-selected': isActive,
+        },
+            h('div', {
+                className: 'flex flex-col items-center justify-center h-full'
+            },
+                h('span', { className: 'text-xs font-bold whitespace-nowrap' }, tabData.name),
+                h('span', { className: 'text-sm' }, tabData.icon)
+            )
+        );
+    };
+
+    const socialLinks = [
+        {
+            href: "https://www.facebook.com/tiendline",
+            name: 'Facebook',
+            icon: h(Facebook, {
+                className: "w-6 h-6",
+                "aria-hidden": "true"
+            })
+        },
+        {
+            href: "https://www.instagram.com/tiendline",
+            name: 'Instagram',
+            icon: h(Instagram, {
+                className: "w-6 h-6",
+                "aria-hidden": "true"
+            })
+        },
+        {
+            href: "https://www.linkedin.com/company/54169569",
+            name: 'LinkedIn',
+            icon: h(Linkedin, {
+                className: "w-6 h-6",
+                "aria-hidden": "true"
+            })
+        },
+    ];
+
+    // Calcular la altura estimada de la cabecera fija
+    // Esto es una estimación. Si el contenido de SponsorsSlider o el header cambia,
+    // es posible que tengas que ajustar el valor de mt-[200px].
+    const mainContentMarginTop = 'mt-[200px]'; // Valor de compensación estimado
+
+    return h('div', { className: 'flex flex-col min-h-screen' }, // Usamos min-h-screen para que el footer esté abajo
+
+        // --- CONTENEDOR FIJO PRINCIPAL (Header, Sponsors, Nav) ---
+        h('div', {
+            className: 'fixed top-0 left-0 w-full z-30 bg-white shadow-xl',
+            style: { zIndex: 9999999 }
+        },
+            // 1. HEADER (Título y Logo) - Quitamos sticky/top-0
+            h('header', {
+                // Fijo arriba (sticky) y sombra oscura. Usamos un color base azul muy oscuro.
+                // Añadimos 'overflow-hidden' para contener la animación de fondo.
+                className: 'sticky top-0 z-30 shadow-2xl border-b border-blue-900/50 p-4 transition-all duration-300 overflow-hidden bg-blue-900'
+            },
+                // --- Capa de la Animación de Fondo Sutil ---
+                h('div', {
+                    // Un gradiente que va de un azul oscuro a un azul más claro, y de nuevo al oscuro.
+                    // Usa animate-pulse que es de Tailwind CDN y da un sutil efecto de "respiración".
+                    className: 'absolute inset-0 bg-gradient-to-r from-blue-900 via-blue-700 to-blue-900 opacity-50 animate-pulse'
+                }),
+
+                h('div', {
+                    className: 'relative max-w-6xl mx-auto py-1 px-4 sm:px-6 lg:px-8 flex items-center justify-between'
+                },
+                    // A. Logo y Título
+                    h('div', { className: 'flex items-center space-x-3 sm:space-x-4' },
+                        // Logo
+                        h('img', {
+                            src: 'images/logo-padel.png',
+                            alt: 'Logo ADYC',
+                            className: 'h-10 w-auto object-contain bg-white rounded-lg p-1 shadow-md transition-transform hover:scale-105'
+                        }),
+
+                        // Título Único (Todo en un solo h1)
+                        h('h1', {
+                            // Combinamos el título principal con un texto secundario más pequeño, todo en blanco
+                            className: 'text-xl sm:text-2xl font-black tracking-tight text-white flex items-center space-x-2'
+                        },
+                            // 1. Título principal
+                            h('span', null, 'Torneo de Padel ADYC'),
+
+                            // 2. Separador visual (opcional)
+                            h('span', { className: 'text-sm text-blue-300 hidden sm:inline' }, '|'),
+
+                            // 3. Texto secundario (más pequeño y discreto)
+                            h('span', { className: 'text-base font-semibold text-blue-300 hidden sm:inline' }, 'Resultados en Vivo')
+                        )
+                    ),
+
+                    // B. Elemento Dinámico 'Live'
+                    h('div', { className: 'text-right hidden sm:block' },
+                        // Etiqueta 'Live' con fondo blanco/semitransparente y pulso para indicar actividad
+                        h('span', {
+                            className: 'text-sm font-extrabold text-blue-800 bg-white/90 px-3 py-1 rounded-full shadow-inner animate-pulse'
+                        }, 'LIVE')
+                    )
+                )
+            ),
+
+            // 2. SPONSORS SLIDER
+            h(SponsorsSlider, null),
+
+            // 3. NAV (Tabs de Torneos) - Quitamos sticky/top-0 y z-10
+            h('nav', {
+                className: 'flex justify-between bg-white border-b border-gray-200 shadow-md',
+                role: 'tablist'
+            },
+                tournamentData.map((tab, index) => h(TabButton, {
+                    key: tab.id,
+                    index: index,
+                    tabData: tab
+                }))
+            ),
+        ),
+        // -----------------------------------------------------------
+
+        // --- CONTENIDO PRINCIPAL (MAIN) ---
+        // CLAVE: Se añade el margen superior para compensar la altura de la cabecera fija
+        h('main', { className: `p-2 ${mainContentMarginTop} flex-grow` },
+            userId && h('div', { className: 'p-3 bg-gray-100 text-xs text-gray-600 break-words rounded-lg mb-4 text-center' }, `ID de Usuario: ${userId}`),
+            h(TournamentContent, { data: activeTournament, standings: standings, db, userId })
+        ),
+        // -----------------------------------------------------------
+
+
+        h('footer', { className: 'bg-gray-800 text-white mt-8 pt-6 pb-4 shadow-inner' },
+            h('div', { className: 'max-w-6xl mx-auto px-4' },
+
+                // Sección de Redes Sociales (Social Links)
+                h('div', { className: 'flex justify-center mb-4 border-b border-gray-700 pb-4' },
+                    h('ul', { className: 'flex space-x-6' },
+                        socialLinks.map(link =>
+                            h('li', { key: link.name },
+                                h('a', {
+                                    href: link.href,
+                                    target: '_blank',
+                                    rel: 'noopener noreferrer',
+                                    title: link.name,
+                                    className: 'text-gray-400 hover:text-indigo-400 transition-colors duration-200 text-2'
+                                }, link.icon) // Usando emoji como sustituto del icono
+                            )
+                        )
+                    )
+                ),
+
+                // Sección de Copyright
+                h('div', { className: 'text-center' },
+                    h('p', { className: 'text-sm text-gray-500' },
+                        'Copyright © 2020 Tiendline - Design: ',
+                        h('span', { className: 'font-semibold text-gray-400' }, 'Tiendline')
+                    )
+                )
+            )
+        )
+    );
+}
+
+render(h(App), document.getElementById('app'));
