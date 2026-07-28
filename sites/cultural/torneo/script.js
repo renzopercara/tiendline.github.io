@@ -8,10 +8,37 @@ import { calculateStandings } from "./americano-3.js";
 import { Sum14ClassificationView } from "./suma14-3.js";
 import { MatchesView, PlayerTable, LoadingSpinner, convertToBracketFormat } from "./common-3.js";
 import { SponsorsSlider } from "./SponsorSlider-3.js";
-import { Facebook, Instagram, Linkedin } from "lucide-preact";
 import { MenuCantina } from "./MenuCantina-3.js";
 
+const Facebook = ({ className }) =>
+    h("svg", {
+        xmlns: "http://www.w3.org/2000/svg",
+        viewBox: "0 0 24 24",
+        fill: "currentColor",
+        className
+    }, h("path", {
+        d: "M24 12.07C24 5.404 18.627 0 12 0S0 5.404 0 12.07c0 6.019 4.388 11.009 10.125 11.93v-8.437H7.078v-3.493h3.047V9.41c0-3.017 1.792-4.686 4.533-4.686 1.312 0 2.686.235 2.686.235v2.963h-1.514c-1.491 0-1.956.928-1.956 1.88v2.268h3.328l-.532 3.493h-2.796V24C19.612 23.079 24 18.089 24 12.07z"
+    }));
 
+const Instagram = ({ className }) =>
+    h("svg", {
+        xmlns: "http://www.w3.org/2000/svg",
+        viewBox: "0 0 24 24",
+        fill: "currentColor",
+        className
+    }, h("path", {
+        d: "M7 2C4.243 2 2 4.243 2 7v10c0 2.757 2.243 5 5 5h10c2.757 0 5-2.243 5-5V7c0-2.757-2.243-5-5-5H7zm10 2c1.654 0 3 1.346 3 3v10c0 1.654-1.346 3-3 3H7c-1.654 0-3-1.346-3-3V7c0-1.654 1.346-3 3-3h10zm-5 3.5A5.5 5.5 0 1 0 17.5 13 5.506 5.506 0 0 0 12 7.5zm0 2A3.5 3.5 0 1 1 8.5 13 3.504 3.504 0 0 1 12 9.5zm5.75-3.25a1.25 1.25 0 1 0 1.25 1.25 1.252 1.252 0 0 0-1.25-1.25z"
+    }));
+
+const Linkedin = ({ className }) =>
+    h("svg", {
+        xmlns: "http://www.w3.org/2000/svg",
+        viewBox: "0 0 24 24",
+        fill: "currentColor",
+        className
+    }, h("path", {
+        d: "M20.447 20.452H16.89v-5.569c0-1.328-.024-3.037-1.852-3.037-1.853 0-2.136 1.445-2.136 2.939v5.667H9.345V9h3.414v1.561h.049c.476-.9 1.637-1.85 3.369-1.85 3.601 0 4.267 2.37 4.267 5.455v6.286zM5.337 7.433a2.063 2.063 0 1 1 0-4.126 2.063 2.063 0 0 1 0 4.126zM7.119 20.452H3.556V9h3.563v11.452z"
+    }));
 
 const JQueryBracketView = ({ initialData, bracketType }) => {
     const bracketRef = useRef(null);
