@@ -288,7 +288,7 @@ export const PlayerTable = ({ standings, showRank = true }) => {
             h('h4', { className: 'text-lg font-bold text-gray-800' }, `Tabla de Posiciones (${standings.length})`)
         ),
         standings.length === 0
-            ? h('p', { className: 'p-4 text-sm text-gray-500 text-center' }, 'Aún no hay jugadores registrados o resultados cargados en este torneo.')
+            ? h('p', { className: 'p-4 text-sm text-gray-500 text-center' })
             : h('div', { className: 'overflow-x-auto' },
                 h('table', { className: 'min-w-full divide-y divide-gray-200' },
                     h('thead', { className: 'bg-gray-100' },

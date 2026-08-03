@@ -9,6 +9,7 @@ import { Sum14ClassificationView } from "./suma14-3.js";
 import { PlayerTable, LoadingSpinner, convertToBracketFormat } from "./common-3.js";
 import { SponsorsSlider } from "./SponsorSlider-3.js";
 import { MenuCantina } from "./MenuCantina-3.js";
+import { CronogramaView } from "./Cronograma-3.js";
 
 const Facebook = ({ className }) =>
     h("svg", {
@@ -304,6 +305,10 @@ const TournamentDetails = ({ data, firebaseStandings }) => {
 };
 
 const TournamentContent = ({ data, standings, db, userId }) => {
+    if (data.id === 'Schedule') {
+        return h(CronogramaView);
+    }
+
     if (data.id === 'Menu') {
         return h(MenuCantina);
     }
@@ -322,7 +327,7 @@ const TournamentContent = ({ data, standings, db, userId }) => {
             ? h(TournamentDetails, { data: data, firebaseStandings: standings })
             : h('div', { className: 'space-y-4' },
                 h(PlayerTable, { standings: standings, showRank: true }),
-                h('div', { className: 'p-4 text-center text-gray-500 text-sm' }, 'Para este torneo solo está disponible la tabla de posiciones general (vía Firebase).')
+                h('div', { className: 'p-4 text-center text-gray-500 text-sm' })
             )
     )
 };
@@ -535,8 +540,8 @@ function App() {
 
     // Calcular la altura estimada de la cabecera fija
     // Esto es una estimación. Si el contenido de SponsorsSlider o el header cambia,
-    // es posible que tengas que ajustar el valor de mt-[200px].
-    const mainContentMarginTop = 'mt-[200px]'; // Valor de compensación estimado
+    // es posible que tengas que ajustar el valor de mt-[310px].
+    const mainContentMarginTop = 'mt-[310px]'; // Valor de compensación estimado
 
     return h('div', { className: 'flex flex-col min-h-screen' }, // Usamos min-h-screen para que el footer esté abajo
 
