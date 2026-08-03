@@ -431,7 +431,7 @@ export const CronogramaView = () => {
                                 className: 'w-16 px-10 py-2 text-center text-xs font-semibold uppercase text-gray-600'
                             }, 'Cat.'),
 
-                            h('th', { className: 'w-10 px-1 py-2 text-center text-xs font-semibold uppercase text-gray-600' }, '📍 Zona'),
+                            h('th', { className: 'w-10 px-1 py-2 text-center text-xs font-semibold uppercase text-gray-600' }, 'Zona'),
 
                             h('th', { className: 'px-3 py-3 text-center text-xs font-semibold uppercase text-gray-600' }, '👥 Pareja 1'),
 
