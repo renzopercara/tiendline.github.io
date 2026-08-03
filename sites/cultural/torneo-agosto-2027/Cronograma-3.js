@@ -255,9 +255,13 @@ export const CronogramaView = () => {
 
             setTimeout(() => {
 
-                currentMatchRef.current?.scrollIntoView({
-                    behavior: "smooth",
-                    block: "center"
+                const element = currentMatchRef.current;
+
+                const y = element.getBoundingClientRect().top + window.scrollY - 700;
+
+                window.scrollTo({
+                    top: y,
+                    behavior: "smooth"
                 });
 
             }, 500);
