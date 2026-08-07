@@ -54,7 +54,8 @@ export const SponsorsSlider = () => {
         'images/sponsors/DL-importados.jpeg',
         'images/sponsors/Henke-odontologia.jpeg',
         'images/sponsors/gross-suelos.jpeg',
-        'images/sponsors/renovar-xtreme.jpeg'
+        'images/sponsors/renovar-xtreme.jpeg',
+        'images/sponsors/chilcas.jpeg',        
     ];
 
     // 2. Aplicar la mezcla solo en el montaje inicial
