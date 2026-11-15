@@ -1,4 +1,11 @@
 User-agent: *
 Allow: /
 
+# Sitios de clientes y demos alojados en subdirectorios: no deben competir
+# con el sitio corporativo en los resultados de búsqueda.
+Disallow: /sites/
+
+# Archivo de configuración del editor local, sin valor público.
+Disallow: /prepros-6.config
+
 Sitemap: https://www.tiendline.com/sitemap.xml

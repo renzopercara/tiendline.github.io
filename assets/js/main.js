@@ -7,7 +7,7 @@
   var reduceMotion = window.matchMedia("(prefers-reduced-motion: reduce)");
   var storageKey = "lang";
   var waBase = "https://wa.me/543437405474?text=";
-  var currentLang = "en";
+  var currentLang = "es";
 
   try {
     var stored = window.localStorage.getItem(storageKey);
@@ -15,7 +15,7 @@
       currentLang = stored;
     }
   } catch (error) {
-    currentLang = "en";
+    currentLang = "es";
   }
 
   var header = document.getElementById("site-header");
@@ -58,6 +58,12 @@
     }
     langToggle.setAttribute(
       "aria-label",
+      currentLang === "es"
+        ? "Idioma: ES / EN — Cambiar a inglés"
+        : "Language: EN / ES — Switch to Spanish"
+    );
+    langToggle.setAttribute(
+      "title",
       currentLang === "es" ? "Cambiar a inglés" : "Switch to Spanish"
     );
     updateMenuLabel();
@@ -76,7 +82,7 @@
   }
 
   function applyTranslations(dictionary, language) {
-    document.documentElement.lang = language;
+    document.documentElement.lang = language === "es" ? "es-AR" : "en";
 
     var isErrorPage = document.body.classList.contains("error-page");
     if (isErrorPage && dictionary["error-title"]) {
@@ -93,6 +99,21 @@
     var ogDescription = document.querySelector('meta[property="og:description"]');
     if (ogDescription && dictionary["meta-og-description"]) {
       ogDescription.setAttribute("content", dictionary["meta-og-description"]);
+    }
+
+    var ogTitle = document.querySelector('meta[property="og:title"]');
+    if (ogTitle && dictionary["meta-og-title"]) {
+      ogTitle.setAttribute("content", dictionary["meta-og-title"]);
+    }
+
+    var ogLocale = document.querySelector('meta[property="og:locale"]');
+    if (ogLocale) {
+      ogLocale.setAttribute("content", language === "es" ? "es_AR" : "en_US");
+    }
+
+    var twitterTitle = document.querySelector('meta[name="twitter:title"]');
+    if (twitterTitle && dictionary["meta-og-title"]) {
+      twitterTitle.setAttribute("content", dictionary["meta-og-title"]);
     }
 
     var twitterDescription = document.querySelector('meta[name="twitter:description"]');
@@ -116,10 +137,19 @@
         element.innerHTML = value;
       }
     }
+
+    var labeled = document.querySelectorAll("[data-i18n-aria-label]");
+    for (var j = 0; j < labeled.length; j += 1) {
+      var labelKey = labeled[j].getAttribute("data-i18n-aria-label");
+      var labelValue = dictionary[labelKey];
+      if (typeof labelValue === "string") {
+        labeled[j].setAttribute("aria-label", labelValue);
+      }
+    }
   }
 
   function loadTranslations(language) {
-    var url = "assets/lang/" + language + ".json";
+    var url = "/assets/lang/" + language + ".json";
 
     if (!window.fetch) {
       return;
@@ -134,12 +164,26 @@
         return response.json();
       })
       .then(function (dictionary) {
+        if (language !== currentLang) {
+          return;
+        }
         applyTranslations(dictionary, language);
         setYear();
       })
       .catch(function () {
-        if (language !== "en") {
-          loadTranslations("en");
+        if (language !== currentLang) {
+          return;
+        }
+        if (language !== "es") {
+          currentLang = "es";
+          try {
+            window.localStorage.setItem(storageKey, "es");
+          } catch (error) {
+            /* Storage can be unavailable; the fallback still works. */
+          }
+          updateLanguageButton();
+          updatePlanLinks();
+          loadTranslations("es");
         }
       });
   }
@@ -169,6 +213,16 @@
     }
   }
 
+  function getHeaderFocusables() {
+    if (!header) {
+      return [];
+    }
+    var nodes = header.querySelectorAll("a[href], button:not([disabled])");
+    return Array.prototype.filter.call(nodes, function (node) {
+      return node.offsetParent !== null;
+    });
+  }
+
   function openMenu() {
     if (!header || !menuToggle) {
       return;
@@ -177,6 +231,15 @@
     document.body.classList.add("menu-open");
     menuToggle.setAttribute("aria-expanded", "true");
     updateMenuLabel();
+
+    var firstLink = header.querySelector("#primary-nav a");
+    if (firstLink) {
+      window.setTimeout(function () {
+        if (header.classList.contains("nav-open")) {
+          firstLink.focus();
+        }
+      }, 60);
+    }
   }
 
   function initNavigation() {
@@ -191,7 +254,7 @@
     if (menuToggle) {
       menuToggle.addEventListener("click", function () {
         if (header && header.classList.contains("nav-open")) {
-          closeMenu(false);
+          closeMenu(true);
         } else {
           openMenu();
         }
@@ -201,13 +264,46 @@
     var navLinks = document.querySelectorAll("#primary-nav a");
     for (var i = 0; i < navLinks.length; i += 1) {
       navLinks[i].addEventListener("click", function () {
+        var href = this.getAttribute("href");
         closeMenu(false);
+        if (href && href.charAt(0) === "#") {
+          var target = document.getElementById(href.slice(1));
+          if (target) {
+            target.setAttribute("tabindex", "-1");
+            target.focus({ preventScroll: true });
+          }
+        }
       });
     }
 
     document.addEventListener("keydown", function (event) {
-      if (event.key === "Escape" && header && header.classList.contains("nav-open")) {
+      if (!header || !header.classList.contains("nav-open")) {
+        return;
+      }
+
+      if (event.key === "Escape") {
         closeMenu(true);
+        return;
+      }
+
+      if (event.key !== "Tab") {
+        return;
+      }
+
+      var focusables = getHeaderFocusables();
+      if (!focusables.length) {
+        return;
+      }
+
+      var first = focusables[0];
+      var last = focusables[focusables.length - 1];
+
+      if (event.shiftKey && document.activeElement === first) {
+        event.preventDefault();
+        last.focus();
+      } else if (!event.shiftKey && document.activeElement === last) {
+        event.preventDefault();
+        first.focus();
       }
     });
 
@@ -381,6 +477,11 @@
       var maxScroll = track.scrollWidth - track.clientWidth;
       prevButton.disabled = track.scrollLeft <= 2;
       nextButton.disabled = track.scrollLeft >= maxScroll - 2;
+
+      var controls = document.querySelector(".carousel-controls");
+      if (controls) {
+        controls.classList.toggle("is-hidden", maxScroll <= 2);
+      }
     };
 
     var scroll = function (direction) {
@@ -424,6 +525,7 @@
   }
 
   function init() {
+    document.documentElement.lang = currentLang === "es" ? "es-AR" : "en";
     setYear();
     updateLanguageButton();
     updatePlanLinks();
@@ -437,7 +539,13 @@
       langToggle.addEventListener("click", switchLanguage);
     }
 
-    loadTranslations(currentLang);
+    // El HTML ya se entrega en español: no hace falta pedir el diccionario
+    // hasta que la persona elige inglés o vuelve a español tras cambiarlo.
+    if (currentLang === "en") {
+      loadTranslations("en");
+    } else {
+      setYear();
+    }
   }
 
   if (document.readyState === "loading") {
