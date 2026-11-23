@@ -4,10 +4,9 @@
 
   document.documentElement.classList.add("js");
 
-  var reduceMotion = window.matchMedia("(prefers-reduced-motion: reduce)");
   var storageKey = "lang";
-  var waBase = "https://wa.me/543437405474?text=";
   var currentLang = "es";
+  var renderedLang = "es";
 
   try {
     var stored = window.localStorage.getItem(storageKey);
@@ -20,12 +19,7 @@
 
   var header = document.getElementById("site-header");
   var menuToggle = document.getElementById("menu-toggle");
-  var langToggle = document.getElementById("lang-toggle");
-  var langCurrent = langToggle ? langToggle.querySelector(".lang-current") : null;
-  var langNext = langToggle ? langToggle.querySelector(".lang-next") : null;
-  var track = document.getElementById("projects-track");
-  var prevButton = document.getElementById("projects-prev");
-  var nextButton = document.getElementById("projects-next");
+  var langButtons = document.querySelectorAll("[data-lang]");
 
   function setYear() {
     var year = document.getElementById("year");
@@ -47,43 +41,24 @@
   }
 
   function updateLanguageButton() {
-    if (!langToggle) {
-      return;
+    for (var i = 0; i < langButtons.length; i += 1) {
+      var button = langButtons[i];
+      var language = button.getAttribute("data-lang");
+      var isActive = language === currentLang;
+      button.setAttribute("aria-pressed", isActive ? "true" : "false");
+      button.classList.toggle("is-active", isActive);
+      if (language === "es") {
+        button.setAttribute("aria-label", isActive ? "ES — Español, idioma seleccionado" : "ES — Cambiar a español");
+        button.setAttribute("title", isActive ? "Español" : "Cambiar a español");
+      } else {
+        button.setAttribute("aria-label", isActive ? "EN — English, selected language" : "EN — Switch to English");
+        button.setAttribute("title", isActive ? "English" : "Switch to English");
+      }
     }
-    if (langCurrent) {
-      langCurrent.textContent = currentLang.toUpperCase();
-    }
-    if (langNext) {
-      langNext.textContent = currentLang === "es" ? "EN" : "ES";
-    }
-    langToggle.setAttribute(
-      "aria-label",
-      currentLang === "es"
-        ? "Idioma: ES / EN — Cambiar a inglés"
-        : "Language: EN / ES — Switch to Spanish"
-    );
-    langToggle.setAttribute(
-      "title",
-      currentLang === "es" ? "Cambiar a inglés" : "Switch to Spanish"
-    );
     updateMenuLabel();
   }
 
-  function updatePlanLinks() {
-    var links = document.querySelectorAll("[data-plan]");
-    for (var i = 0; i < links.length; i += 1) {
-      var plan = links[i].getAttribute("data-plan");
-      var message =
-        currentLang === "es"
-          ? "Hola, estoy interesado en el plan " + plan + "."
-          : "Hello, I'm interested in the " + plan + " plan.";
-      links[i].setAttribute("href", waBase + encodeURIComponent(message));
-    }
-  }
-
   function applyTranslations(dictionary, language) {
-    document.documentElement.lang = language === "es" ? "es-AR" : "en";
-
     var isErrorPage = document.body.classList.contains("error-page");
     if (isErrorPage && dictionary["error-title"]) {
       document.title = dictionary["error-title"] + " | Tiendline";
@@ -146,6 +121,8 @@
         labeled[j].setAttribute("aria-label", labelValue);
       }
     }
+
+    document.documentElement.lang = language === "es" ? "es-AR" : "en";
   }
 
   function loadTranslations(language) {
@@ -168,35 +145,37 @@
           return;
         }
         applyTranslations(dictionary, language);
+        renderedLang = language;
+        updateLanguageButton();
         setYear();
       })
       .catch(function () {
         if (language !== currentLang) {
           return;
         }
-        if (language !== "es") {
-          currentLang = "es";
-          try {
-            window.localStorage.setItem(storageKey, "es");
-          } catch (error) {
-            /* Storage can be unavailable; the fallback still works. */
-          }
-          updateLanguageButton();
-          updatePlanLinks();
-          loadTranslations("es");
+        currentLang = renderedLang;
+        try {
+          window.localStorage.setItem(storageKey, currentLang);
+        } catch (error) {
+          /* Storage can be unavailable; the rendered language still matches. */
         }
+        updateLanguageButton();
       });
   }
 
-  function switchLanguage() {
-    currentLang = currentLang === "es" ? "en" : "es";
+  function setLanguage(language) {
+    if (language !== "es" && language !== "en") {
+      return;
+    }
+    if (language === currentLang) {
+      return;
+    }
+    currentLang = language;
     try {
       window.localStorage.setItem(storageKey, currentLang);
     } catch (error) {
       /* Storage can be unavailable; the switch still works for this view. */
     }
-    updateLanguageButton();
-    updatePlanLinks();
     loadTranslations(currentLang);
   }
 
@@ -365,186 +344,23 @@
     }
   }
 
-  function initReveal() {
-    var items = document.querySelectorAll(".reveal");
-
-    if (!items.length) {
-      return;
-    }
-
-    if (!("IntersectionObserver" in window) || reduceMotion.matches) {
-      for (var i = 0; i < items.length; i += 1) {
-        items[i].classList.add("is-visible");
-      }
-      return;
-    }
-
-    var observer = new IntersectionObserver(
-      function (entries, instance) {
-        for (var j = 0; j < entries.length; j += 1) {
-          if (entries[j].isIntersecting) {
-            entries[j].target.classList.add("is-visible");
-            instance.unobserve(entries[j].target);
-          }
-        }
-      },
-      { rootMargin: "0px 0px -8% 0px", threshold: 0.08 }
-    );
-
-    for (var k = 0; k < items.length; k += 1) {
-      observer.observe(items[k]);
-    }
-  }
-
-  function initCounters() {
-    var counters = document.querySelectorAll("[data-count]");
-
-    if (!counters.length) {
-      return;
-    }
-
-    var animate = function (element) {
-      var target = parseInt(element.getAttribute("data-count"), 10);
-      if (isNaN(target)) {
-        return;
-      }
-
-      if (reduceMotion.matches) {
-        element.textContent = String(target);
-        return;
-      }
-
-      var duration = 1400;
-      var started = null;
-
-      var step = function (timestamp) {
-        if (started === null) {
-          started = timestamp;
-        }
-        var progress = Math.min((timestamp - started) / duration, 1);
-        var eased = 1 - Math.pow(1 - progress, 3);
-        element.textContent = String(Math.round(target * eased));
-        if (progress < 1) {
-          window.requestAnimationFrame(step);
-        } else {
-          element.textContent = String(target);
-        }
-      };
-
-      window.requestAnimationFrame(step);
-    };
-
-    if (!("IntersectionObserver" in window)) {
-      for (var i = 0; i < counters.length; i += 1) {
-        counters[i].textContent = counters[i].getAttribute("data-count");
-      }
-      return;
-    }
-
-    var observer = new IntersectionObserver(
-      function (entries, instance) {
-        for (var j = 0; j < entries.length; j += 1) {
-          if (entries[j].isIntersecting) {
-            animate(entries[j].target);
-            instance.unobserve(entries[j].target);
-          }
-        }
-      },
-      { threshold: 0.55 }
-    );
-
-    for (var k = 0; k < counters.length; k += 1) {
-      observer.observe(counters[k]);
-    }
-  }
-
-  function initProjects() {
-    if (!track || !prevButton || !nextButton) {
-      return;
-    }
-
-    var getStep = function () {
-      var card = track.querySelector(".project-card");
-      if (!card) {
-        return 360;
-      }
-      var styles = window.getComputedStyle(track);
-      var gap = parseFloat(styles.columnGap || styles.gap) || 24;
-      return card.getBoundingClientRect().width + gap;
-    };
-
-    var updateArrows = function () {
-      var maxScroll = track.scrollWidth - track.clientWidth;
-      prevButton.disabled = track.scrollLeft <= 2;
-      nextButton.disabled = track.scrollLeft >= maxScroll - 2;
-
-      var controls = document.querySelector(".carousel-controls");
-      if (controls) {
-        controls.classList.toggle("is-hidden", maxScroll <= 2);
-      }
-    };
-
-    var scroll = function (direction) {
-      track.scrollBy({
-        left: getStep() * direction,
-        behavior: reduceMotion.matches ? "auto" : "smooth"
-      });
-    };
-
-    prevButton.addEventListener("click", function () {
-      scroll(-1);
-    });
-
-    nextButton.addEventListener("click", function () {
-      scroll(1);
-    });
-
-    track.addEventListener("scroll", updateArrows, { passive: true });
-    window.addEventListener("resize", updateArrows);
-
-    track.addEventListener("keydown", function (event) {
-      if (event.key === "ArrowRight") {
-        event.preventDefault();
-        scroll(1);
-      } else if (event.key === "ArrowLeft") {
-        event.preventDefault();
-        scroll(-1);
-      } else if (event.key === "Home") {
-        event.preventDefault();
-        track.scrollTo({ left: 0, behavior: reduceMotion.matches ? "auto" : "smooth" });
-      } else if (event.key === "End") {
-        event.preventDefault();
-        track.scrollTo({
-          left: track.scrollWidth,
-          behavior: reduceMotion.matches ? "auto" : "smooth"
-        });
-      }
-    });
-
-    updateArrows();
-  }
-
   function init() {
-    document.documentElement.lang = currentLang === "es" ? "es-AR" : "en";
     setYear();
-    updateLanguageButton();
-    updatePlanLinks();
     initNavigation();
     initScrollSpy();
-    initReveal();
-    initCounters();
-    initProjects();
 
-    if (langToggle) {
-      langToggle.addEventListener("click", switchLanguage);
+    for (var i = 0; i < langButtons.length; i += 1) {
+      langButtons[i].addEventListener("click", function () {
+        setLanguage(this.getAttribute("data-lang"));
+      });
     }
 
-    // El HTML ya se entrega en español: no hace falta pedir el diccionario
-    // hasta que la persona elige inglés o vuelve a español tras cambiarlo.
+    // The HTML is delivered in Spanish. Only fetch a dictionary when the
+    // stored preference is English; keep the Spanish DOM until it applies.
     if (currentLang === "en") {
       loadTranslations("en");
     } else {
-      setYear();
+      updateLanguageButton();
     }
   }
 

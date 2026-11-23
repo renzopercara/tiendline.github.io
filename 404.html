@@ -17,8 +17,8 @@
   <link rel="icon" type="image/png" sizes="32x32" href="/assets/images/brand/favicon/favicon-32x32.png">
   <link rel="apple-touch-icon" sizes="180x180" href="/apple-touch-icon.png">
   <link rel="manifest" href="/assets/images/brand/web/site.webmanifest">
-  <link rel="stylesheet" href="/assets/css/styles.css?v=20261115-5">
-  <script src="/assets/js/main.js?v=20261115-5" defer></script>
+  <link rel="stylesheet" href="/assets/css/styles.css?v=20261123-2">
+  <script src="/assets/js/main.js?v=20261123-2" defer></script>
 </head>
 
 <body class="error-page">
@@ -32,11 +32,10 @@
       </a>
 
       <div class="header-actions">
-        <button class="lang-toggle" id="lang-toggle" type="button" aria-label="Idioma: ES / EN — Cambiar a inglés" title="Cambiar a inglés">
-          <span class="lang-current" aria-hidden="true">ES</span>
-          <span class="lang-divider" aria-hidden="true">/</span>
-          <span class="lang-next" aria-hidden="true">EN</span>
-        </button>
+        <div class="lang-switch" role="group" aria-label="Idioma / Language">
+          <button class="lang-option is-active" type="button" data-lang="es" aria-pressed="true" aria-label="ES — Español, idioma seleccionado" title="Español" lang="es">ES</button>
+          <button class="lang-option" type="button" data-lang="en" aria-pressed="false" aria-label="EN — Switch to English" title="Switch to English" lang="en">EN</button>
+        </div>
       </div>
     </div>
   </header>
@@ -49,7 +48,7 @@
         <p lang-trans="error-description">La página que buscás no existe o cambió de lugar. Volvamos al camino correcto.</p>
         <div class="error-actions">
           <a class="btn btn-primary" href="/" lang-trans="error-home">Volver al inicio</a>
-          <a class="btn btn-secondary" href="https://wa.me/543437405474?text=Hola%2C%20quiero%20hablar%20sobre%20un%20proyecto%20de%20desarrollo%20de%20software" target="_blank" rel="noopener" lang-trans="error-whatsapp">Escribinos por WhatsApp</a>
+          <a class="btn btn-secondary" href="https://wa.me/5493437405474?text=Hola%2C%20quiero%20hablar%20sobre%20un%20proyecto%20de%20desarrollo%20de%20software" target="_blank" rel="noopener" lang-trans="error-whatsapp">Escribinos por WhatsApp</a>
         </div>
       </div>
     </div>
